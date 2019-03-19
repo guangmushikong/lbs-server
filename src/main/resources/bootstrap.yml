@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: lbs-server
+  cloud:
+    config:
+      name: lbi-tile,database-config
+      profile: dev
+      discovery:
+        enabled: true
+        service-id: config-server
+  mvc:
+    favicon:
+      enabled: true
+  security:
+    user:
+      name: AKIAPYRXF3VSENILA42Q
+      password: e3iNcgZ+nuVjnfzHQq2HHxoZd3VySliXyG6vFruP
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+    status-page-url-path: /swagger-ui.html
+  client:
+    serviceUrl:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@127.0.0.1:11111/eureka/

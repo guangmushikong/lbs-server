@@ -1,0 +1,7 @@
+server:
+  port: 8080
+################### 应用配置
+info:
+  version: 0.0.1
+  name: ${spring.application.name}
+  comment: "LBS服务引擎"
