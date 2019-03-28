@@ -79,16 +79,16 @@ public class TileDao extends CommonDao{
         return list;
     }
 
-    public List<JSONObject> getLPSListByTile(String tableName, Tile tile){
+    public List<JSONObject> getLPSListByTile(String tableName,String color,Tile tile){
         List<JSONObject> list=null;
         try{
             Envelope enve= TileSystem.TileXYToBounds(tile);
             Geometry grid= GEO_FACTORY.toGeometry(enve);
             StringBuilder sb=new StringBuilder();
-            sb.append("select json_build_object('type','Feature','id',id,'geometry',ST_AsGeoJSON(ST_Transform(geom,4326))::json,'properties',json_build_object('name','liupanshui')) as geojson");
+            sb.append("select json_build_object('type','Feature','id',id,'geometry',ST_AsGeoJSON(ST_Transform(geom,4326))::json,'properties',json_build_object('name','liupanshui','color','"+color+"')) as geojson");
             sb.append(" from "+tableName);
             sb.append(" where st_intersects(st_geomfromtext('"+grid.toText()+"',4326),ST_Transform(geom,4326))");
-
+            System.out.println("【sql】"+sb.toString());
             list=jdbcTemplate.query(
                     sb.toString(),
                     new RowMapper<JSONObject>() {

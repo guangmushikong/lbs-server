@@ -49,6 +49,34 @@ public class TMSService {
         return null;
     }
 
+    public byte[] getLayer(
+            String version,
+            String layerName,
+            String srs,
+            String extension){
+        try{
+            StringBuilder sb=new StringBuilder();
+            sb.append(tiledata);
+            sb.append(File.separator).append(layerName);
+            sb.append(File.separator).append("layer.json");
+            //System.out.println("【path】"+sb.toString());
+            File file=new File(sb.toString());
+            FileInputStream fis = new FileInputStream(file);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
+            byte[] b = new byte[1000];
+            int n;
+            while ((n = fis.read(b)) != -1) {
+                bos.write(b, 0, n);
+            }
+            fis.close();
+            bos.close();
+            return bos.toByteArray();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     private byte[] getCacheTile(TileMap tileMap, Tile tile){
         try{
@@ -59,10 +87,11 @@ public class TMSService {
             sb.append(File.separator).append(tile.getX());
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
-            System.out.println("【path】"+sb.toString());
+            //System.out.println("【path】"+sb.toString());
             File file=new File(sb.toString());
             if(file.exists()){
-                if(tileMap.getExtension().equalsIgnoreCase("tif")){
+                if(tileMap.getExtension().equalsIgnoreCase("tif")
+                        || tileMap.getExtension().equalsIgnoreCase("terrain")){
                     FileInputStream fis = new FileInputStream(file);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
                     byte[] b = new byte[1000];
@@ -96,7 +125,7 @@ public class TMSService {
             sb.append(File.separator).append(tile.getX());
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
-            System.out.println("【path】"+sb.toString());
+            //System.out.println("【path】"+sb.toString());
             File file=new File(sb.toString());
             if(file.exists()){
                 if(tileMap.getExtension().equalsIgnoreCase("tif")){

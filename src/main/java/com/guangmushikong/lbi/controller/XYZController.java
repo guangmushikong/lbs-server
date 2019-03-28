@@ -54,13 +54,13 @@ public class XYZController {
                 JSONArray body=xyzService.getCityRegionByTile(tile);
                 if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
             }else if(layerName.equalsIgnoreCase("liupanshui_extent_line")) {
-                JSONArray body=xyzService.getLPSByTile("liupanshui_extent_line",tile);
+                JSONArray body=xyzService.getLPSByTile("liupanshui_extent_line","green",tile);
                 if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
             }else if(layerName.equalsIgnoreCase("liupanshui_track_line")) {
-                JSONArray body=xyzService.getLPSByTile("liupanshui_track_line",tile);
+                JSONArray body=xyzService.getLPSByTile("liupanshui_track_line","yellow",tile);
                 if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
             }else if(layerName.equalsIgnoreCase("liupanshui_point")) {
-                JSONArray body=xyzService.getLPSByTile("liupanshui_point",tile);
+                JSONArray body=xyzService.getLPSByTile("liupanshui_point","red",tile);
                 if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
             }else{
                 String body=xyzService.getCacheJsonTile(version,args[0],args[1],args[2],tile);
@@ -75,6 +75,9 @@ public class XYZController {
         }else if(extension.equalsIgnoreCase("tif")){
             byte[] bytes=xyzService.getXYZ_Tile(version,args[0],args[1],args[2],tile);
             return ResponseEntity.ok().contentType(MediaType.valueOf("image/tif")).body(bytes);
+        }else if(extension.equalsIgnoreCase("terrain")){
+            byte[] bytes=xyzService.getXYZ_Tile(version,args[0],args[1],args[2],tile);
+            return ResponseEntity.ok().contentType(MediaType.valueOf("application/terrain")).body(bytes);
         }
         return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
     }
@@ -106,11 +109,11 @@ public class XYZController {
             }else if(layerName.equalsIgnoreCase("city")){
                 body=xyzService.getCityRegionByTile(tile);
             }else if(layerName.equalsIgnoreCase("liupanshui_extent_line")){
-                body=xyzService.getLPSByTile("liupanshui_extent_line",tile);
+                body=xyzService.getLPSByTile("liupanshui_extent_line","green",tile);
             }else if(layerName.equalsIgnoreCase("liupanshui_point")){
-                body=xyzService.getLPSByTile("liupanshui_point",tile);
+                body=xyzService.getLPSByTile("liupanshui_point","red",tile);
             }else if(layerName.equalsIgnoreCase("liupanshui_track_line")){
-                body=xyzService.getLPSByTile("liupanshui_track_line",tile);
+                body=xyzService.getLPSByTile("liupanshui_track_line","yellow",tile);
             }
             if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
         }else if(extension.equalsIgnoreCase("png")){

@@ -77,10 +77,12 @@ public class XYZService {
             sb.append(File.separator).append(tile.getX());
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
-            //System.out.println(tile.getX()+","+tile.getY()+","+tile.getZ()+"|"+sb.toString());
+            System.out.println(tile.getX()+","+tile.getY()+","+tile.getZ()+"|"+sb.toString());
             File file=new File(sb.toString());
             if(file.exists()){
-                if(tileMap.getExtension().equalsIgnoreCase("tif") || tileMap.getExtension().equalsIgnoreCase("geojson")){
+                if(tileMap.getExtension().equalsIgnoreCase("tif")
+                        || tileMap.getExtension().equalsIgnoreCase("geojson")
+                        || tileMap.getExtension().equalsIgnoreCase("terrain")){
                     FileInputStream fis = new FileInputStream(file);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
                     byte[] b = new byte[1000];
@@ -91,9 +93,7 @@ public class XYZService {
                     fis.close();
                     bos.close();
                     return bos.toByteArray();
-                }/*else if(tileMap.getExtension().equalsIgnoreCase("geojson")){
-
-                }*/else{
+                }else{
                     BufferedImage image=ImageIO.read(file);
                     if(image!=null)return ImageUtil.toByteArray(image);
                 }
@@ -241,10 +241,10 @@ public class XYZService {
         return body;
     }
 
-    public JSONArray getLPSByTile(String layerName,Tile tile){
+    public JSONArray getLPSByTile(String layerName,String color,Tile tile){
         JSONArray body=new JSONArray();
         try{
-            List<JSONObject> list=tileDao.getLPSListByTile(layerName,tile);
+            List<JSONObject> list=tileDao.getLPSListByTile(layerName,color,tile);
             if(list!=null){
                 for(JSONObject u:list){
                     body.add(u);

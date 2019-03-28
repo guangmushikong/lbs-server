@@ -52,11 +52,23 @@ public class TMSController {
             }else if(extension.equalsIgnoreCase("tif")){
                 byte[] bytes=tmsService.getTMS_Tile(version,args[0],args[1],args[2],tile);
                 return ResponseEntity.ok().contentType(MediaType.valueOf("image/tif")).body(bytes);
+            }else if(extension.equalsIgnoreCase("terrain")){
+                byte[] bytes=tmsService.getTMS_Tile(version,args[0],args[1],args[2],tile);
+                return ResponseEntity.ok().contentType(MediaType.valueOf("application/vnd.quantized-mesh")).body(bytes);
             }
         }catch (Exception e){
             e.printStackTrace();
             //log.error(e.getMessage());
         }
         return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value="/{version}/{tileset}/layer.json",method = RequestMethod.GET)
+    public ResponseEntity getLayer(@PathVariable("version") String version,
+                                   @PathVariable("tileset") String tileset){
+        String[] args=tileset.split("@");
+        byte[] bytes=tmsService.getLayer(version,args[0],args[1],args[2]);
+        if(bytes!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bytes);
+        else return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
     }
 }

@@ -1,5 +1,8 @@
 server:
   port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/vnd.quantized-mesh
 ################### 应用配置
 info:
   version: 0.0.1
