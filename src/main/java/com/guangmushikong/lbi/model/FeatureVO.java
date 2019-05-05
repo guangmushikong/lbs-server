@@ -2,8 +2,7 @@ package com.guangmushikong.lbi.model;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /*************************************
  * Class Name: FeatureVO
@@ -11,8 +10,7 @@ import lombok.Setter;
  * @create 2018/5/14
  * @since 1.0.0
  ************************************/
-@Getter
-@Setter
+@Data
 public class FeatureVO {
     @JSONField(ordinal = 1)
     String type;

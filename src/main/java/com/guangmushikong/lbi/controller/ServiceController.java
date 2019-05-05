@@ -2,6 +2,7 @@
 package com.guangmushikong.lbi.controller;
 
 
+import com.guangmushikong.lbi.model.ServiceType;
 import com.guangmushikong.lbi.model.xml.Root_Services;
 import com.guangmushikong.lbi.model.xml.Root_TileMap;
 import com.guangmushikong.lbi.model.xml.Root_TileMapService;
@@ -10,13 +11,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -28,13 +24,10 @@ public class ServiceController {
     MetaService metaService;
 
     @ApiOperation(value = "地图服务类型列表", notes = "获取地图服务类型列表", produces = "application/xml")
-    @RequestMapping(value="", method = RequestMethod.GET)
-    public ResponseEntity getService() {
+    @GetMapping(value = "", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
+    public Root_Services getService() {
         Root_Services u = metaService.getServices();
-        if (u != null) {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(u);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        return u;
     }
 
     @ApiOperation(value = "地图服务列表", notes = "获取地图服务列表", produces = "application/xml")
@@ -42,21 +35,18 @@ public class ServiceController {
             @ApiImplicitParam(name = "service", value = "服务名", required = true, dataType = "string"),
             @ApiImplicitParam(name = "version", value = "版本号", required = true, dataType = "string")
     })
-    @RequestMapping(value="/{service}/{version}", method = RequestMethod.GET)
-    public ResponseEntity getTileMapService(
+    @GetMapping(value = "/{service}/{version}", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
+    public Root_TileMapService getTileMapService(
             @PathVariable("service") String service,
             @PathVariable("version") String version) {
         Root_TileMapService u=null;
-        if(service.equalsIgnoreCase("xyz")){
-            u = metaService.getTileMapService(1,version);
-        }else if(service.equalsIgnoreCase("tms")){
-            u = metaService.getTileMapService(2,version);
+        ServiceType type=ServiceType.valueOf(service.toUpperCase());
+        if(type==ServiceType.XYZ){
+            u = metaService.getTileMapService(type.getValue(),version);
+        }else if(type==ServiceType.TMS){
+            u = metaService.getTileMapService(type.getValue(),version);
         }
-
-        if (u != null) {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(u);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        return u;
     }
 
     @ApiOperation(value = "地图服务数据集", notes = "获取地图服务数据集", produces = "application/xml")
@@ -65,22 +55,19 @@ public class ServiceController {
             @ApiImplicitParam(name = "version", value = "版本号", required = true, dataType = "string"),
             @ApiImplicitParam(name = "tileset", value = "数据集名", required = true, dataType = "string")
     })
-    @RequestMapping(value="/{service}/{version}/{tileset}", method = RequestMethod.GET)
-    public ResponseEntity getTileMap(
+    @GetMapping(value = "/{service}/{version}/{tileset}", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
+    public Root_TileMap getTileMap(
             @PathVariable("service") String service,
             @PathVariable("version") String version,
             @PathVariable("tileset") String tileset) {
         String[] args=tileset.split("@");
+        ServiceType type=ServiceType.valueOf(service.toUpperCase());
         Root_TileMap u = null;
-        if(service.equalsIgnoreCase("xyz")){
-            u = metaService.getTileMap(1,version,args[0],args[1],args[2]);
-        }else if(service.equalsIgnoreCase("tms")){
-            u = metaService.getTileMap(2,version,args[0],args[1],args[2]);
+        if(type==ServiceType.XYZ){
+            u = metaService.getTileMap(type.getValue(),version,args[0],args[1],args[2]);
+        }else if(type==ServiceType.TMS){
+            u = metaService.getTileMap(type.getValue(),version,args[0],args[1],args[2]);
         }
-
-        if (u != null) {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(u);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        return u;
     }
 }

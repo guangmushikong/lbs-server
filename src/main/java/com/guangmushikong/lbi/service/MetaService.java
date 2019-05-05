@@ -1,5 +1,6 @@
 package com.guangmushikong.lbi.service;
 
+import com.google.common.collect.Lists;
 import com.guangmushikong.lbi.dao.MetaDao;
 import com.guangmushikong.lbi.model.*;
 import com.guangmushikong.lbi.model.xml.*;
@@ -9,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service("metaService")
 public class MetaService {
@@ -21,15 +22,13 @@ public class MetaService {
     String mapserver;
 
     public Root_Services getServices(){
-        Root_Services u=new Root_Services();
         List<TileMapService> serviceList=metaDao.getTileMapServiceList();
-        List<Node_TileMapService> nServiceList=new ArrayList<>();
-        for(TileMapService s:serviceList){
-            String href=s.getHref();
-            href=href.replace("${mapserver}",mapserver);
-            Node_TileMapService nService=new Node_TileMapService(s.getTitle(),s.getVersion(),href);
-            nServiceList.add(nService);
-        }
+        List<Node_TileMapService> nServiceList=serviceList
+                .stream()
+                .map(s->new Node_TileMapService(s.getTitle(),s.getVersion(),s.getHref()))
+                .collect(Collectors.toList());
+
+        Root_Services u=new Root_Services();
         u.setTileMapServices(nServiceList);
         return u;
     }
@@ -39,19 +38,20 @@ public class MetaService {
         Root_TileMapService u = new Root_TileMapService();
         u.setVersion(nService.getVersion());
         u.setTitle(nService.getTitle());
-        if(StringUtils.isNotEmpty(nService.getAbstract()))u.setAbstract(nService.getAbstract());
+        if(StringUtils.isNotEmpty(nService.getAbstract())){
+            u.setAbstract(nService.getAbstract());
+        }
         //parent href
-        u.setServices("http://"+mapserver);
+        u.setServices("http://"+mapserver+"/service");
         //child list
         List<TileMap> tileMapList=metaDao.getTileMapList(serviceId);
-        List<Node_TileMap> nTileMapList=new ArrayList<>();
-        for(TileMap m:tileMapList){
-            String href=m.getHref();
-            href=href.replace("${mapserver}",mapserver);
-            Node_TileMap nTileMap=new Node_TileMap(m.getTitle(),m.getSrs(),m.getProfile(),href);
-            nTileMap.setGroup(m.getGroup());
-            nTileMapList.add(nTileMap);
-        }
+        List<Node_TileMap> nTileMapList=tileMapList
+                .stream().map(m->{
+                    Node_TileMap nTileMap=new Node_TileMap(m.getTitle(),m.getSrs(),m.getProfile(),m.getHref());
+                    nTileMap.setGroup(m.getGroup());
+                    return nTileMap;
+                })
+                .collect(Collectors.toList());
         u.setTileMaps(nTileMapList);
         return u;
     }
@@ -67,10 +67,10 @@ public class MetaService {
             item.setVersion(version);
             //parent href
             TileMapService nService=metaDao.getTileMapServiceById(u.getServiceId());
-            String tilemapservice=nService.getHref();
-            tilemapservice=tilemapservice.replace("${mapserver}",mapserver);
-            item.setServices(tilemapservice);
-            if(StringUtils.isNotEmpty(u.getAbstract()))item.setAbstract(u.getAbstract());
+            item.setServices(nService.getHref());
+            if(StringUtils.isNotEmpty(u.getAbstract())){
+                item.setAbstract(u.getAbstract());
+            }
             item.setTitle(u.getTitle());
             item.setSRS(u.getSrs());
 
@@ -95,12 +95,10 @@ public class MetaService {
 
             //child list
             Node_TileSets tileSets=new Node_TileSets();
-            List<Node_TileSet> nTileSetList=new ArrayList<>();
+            List<Node_TileSet> nTileSetList=Lists.newArrayList();
             List<TileSet> tileSetList=metaDao.getTileSetList(u.getId());
             for(TileSet t:tileSetList){
-                String href=t.getHref();
-                href=href.replace("${mapserver}",mapserver);
-                Node_TileSet nTileSet=new Node_TileSet(href,t.getUnitsPerPixel(),t.getSortOrder());
+                Node_TileSet nTileSet=new Node_TileSet(t.getHref(),t.getUnitsPerPixel(),t.getSortOrder());
                 nTileSetList.add(nTileSet);
             }
             tileSets.setProfile(u.getProfile());
@@ -112,35 +110,19 @@ public class MetaService {
     }
 
     public List<TileMap> getTileMapList(){
-        List<TileMap> mapList=new ArrayList<>();
-        List<TileMap> list=null;
-        list=metaDao.getTileMapList(1);
-        if(list!=null)mapList.addAll(list);
-        list=metaDao.getTileMapList(2);
-        if(list!=null)mapList.addAll(list);
-        for(TileMap m:mapList){
-            String href=m.getHref();
-            href=href.replace("${mapserver}",mapserver);
-            m.setHref(href);
-        }
+        List<TileMap> mapList= Lists.newArrayList();
+        List<TileMap> list1=metaDao.getTileMapList(1);
+        mapList.addAll(list1);
+        List<TileMap> list2=metaDao.getTileMapList(2);
+        mapList.addAll(list2);
         return mapList;
     }
 
     public TileMap getTileMapById(long id){
-        TileMap m=metaDao.getTileMapById(id);
-        String href=m.getHref();
-        href=href.replace("${mapserver}",mapserver);
-        m.setHref(href);
-        return m;
+        return metaDao.getTileMapById(id);
     }
     public List<TileSet> getTileSetList(long mapId){
-        List<TileSet> mapSetList=metaDao.getTileSetList(mapId);
-        for(TileSet t:mapSetList){
-            String href=t.getHref();
-            href=href.replace("${mapserver}",mapserver);
-            t.setHref(href);
-        }
-        return mapSetList;
+        return metaDao.getTileSetList(mapId);
     }
 
     public List<ProjectDO> getProjectList(){
@@ -154,19 +136,11 @@ public class MetaService {
     public List<DataSetDO> getDataSetList(long projectId){
         List<DataSetDO> list= metaDao.getDataSetList(projectId);
         //分组
-        Map<String,List<DataSetDO>> groupDict=new HashMap<>();
-        for(DataSetDO dataSet:list){
-            List<DataSetDO> dataSetList;
-            if(groupDict.containsKey(dataSet.getName())){
-                dataSetList=groupDict.get(dataSet.getName());
-            }else {
-                dataSetList=new ArrayList<>();
-            }
-            dataSetList.add(dataSet);
-            groupDict.put(dataSet.getName(),dataSetList);
-        }
+        Map<String,List<DataSetDO>> groupDict=list
+                .stream()
+                .collect(Collectors.groupingBy(DataSetDO::getName));
 
-        List<DataSetDO> result=new ArrayList<>();
+        List<DataSetDO> result=Lists.newArrayList();
         for(String name:groupDict.keySet()){
             List<DataSetDO> dataSetList=groupDict.get(name);
             List<Long> idList=new ArrayList<>();

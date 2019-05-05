@@ -1,6 +1,8 @@
 package com.guangmushikong.lbi.controller;
 
-import com.guangmushikong.lbi.service.TMSService;
+import com.guangmushikong.lbi.model.ServiceType;
+import com.guangmushikong.lbi.model.TileMap;
+import com.guangmushikong.lbi.service.TileService;
 import com.lbi.model.Tile;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -13,13 +15,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 @Api(value = "TMS地图服务", tags = "TMS", description = "TMS协议瓦片地图服务相关接口")
 @RestController
 @RequestMapping("/tms")
+@Slf4j
 public class TMSController {
-    @Resource(name="tmsService")
-    TMSService tmsService;
+    @Resource(name="tileService")
+    TileService tileService;
 
     @ApiOperation(value = "TMS瓦片地图服务", notes = "获取TMS瓦片")
     @ApiImplicitParams({
@@ -38,37 +42,36 @@ public class TMSController {
             @PathVariable("x") long x,
             @PathVariable("y") long y,
             @PathVariable("extension") String extension) {
-        Tile tile=new Tile(x,y,z);
-        String[] args=tileset.split("@");
         try{
-            if(extension.equalsIgnoreCase("json")){
-
-            }else if(extension.equalsIgnoreCase("png")){
-                byte[] bytes=tmsService.getTMS_Tile(version,args[0],args[1],args[2],tile);
-                return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(bytes);
-            }else if(extension.equalsIgnoreCase("jpeg")){
-                byte[] bytes=tmsService.getTMS_Tile(version,args[0],args[1],args[2],tile);
-                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
-            }else if(extension.equalsIgnoreCase("tif")){
-                byte[] bytes=tmsService.getTMS_Tile(version,args[0],args[1],args[2],tile);
-                return ResponseEntity.ok().contentType(MediaType.valueOf("image/tif")).body(bytes);
-            }else if(extension.equalsIgnoreCase("terrain")){
-                byte[] bytes=tmsService.getTMS_Tile(version,args[0],args[1],args[2],tile);
-                return ResponseEntity.ok().contentType(MediaType.valueOf("application/vnd.quantized-mesh")).body(bytes);
+            Tile tile=new Tile(x,y,z);
+            String[] args=tileset.split("@");
+            TileMap tileMap=tileService.getTileMapById(ServiceType.TMS.getValue(),args[0],args[1],args[2]);
+            byte[] bytes=tileService.getTile(tileMap,tile);
+            ResponseEntity.BodyBuilder bodyBuilder=ResponseEntity.ok();
+            if("json".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.APPLICATION_JSON);
+            }else if("png".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.IMAGE_PNG);
+            }else if("jpeg".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
+            }else if("tif".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.valueOf("image/tif"));
+            }else if("terrain".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.valueOf("application/vnd.quantized-mesh"));
             }
+            return bodyBuilder.body(bytes);
         }catch (Exception e){
             e.printStackTrace();
-            //log.error(e.getMessage());
+            log.error(e.getMessage());
         }
         return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value="/{version}/{tileset}/layer.json",method = RequestMethod.GET)
-    public ResponseEntity getLayer(@PathVariable("version") String version,
-                                   @PathVariable("tileset") String tileset){
+    @GetMapping(value = "/{version}/{tileset}/layer.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public byte[] getLayer(
+            @PathVariable("version") String version,
+            @PathVariable("tileset") String tileset)throws IOException {
         String[] args=tileset.split("@");
-        byte[] bytes=tmsService.getLayer(version,args[0],args[1],args[2]);
-        if(bytes!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(bytes);
-        else return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        return tileService.getLayer(version,args[0],args[1],args[2]);
     }
 }

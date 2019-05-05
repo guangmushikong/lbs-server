@@ -8,10 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -24,7 +21,7 @@ public class ProjectController {
     MetaService metaService;
 
     @ApiOperation(value = "项目列表", notes = "获取项目列表", produces = "application/json")
-    @RequestMapping(value="", method = RequestMethod.GET)
+    @GetMapping("")
     public ResultBody getProjectList() {
         List<ProjectDO> list=metaService.getProjectList();
         ResultBody result=new ResultBody();
@@ -36,7 +33,7 @@ public class ProjectController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "项目ID", required = true, dataType = "long")
     })
-    @RequestMapping(value="/{projectId}", method = RequestMethod.GET)
+    @GetMapping("/{projectId}")
     public ResultBody getProject(@PathVariable("projectId") long projectId) {
         ProjectDO result=metaService.getProjectById(projectId);
         return new ResultBody(result);
@@ -46,7 +43,7 @@ public class ProjectController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "项目ID", required = true, dataType = "long")
     })
-    @RequestMapping(value="/{projectId}/datasets", method = RequestMethod.GET)
+    @GetMapping("/{projectId}/datasets")
     public ResultBody getDatasetList(@PathVariable("projectId") long projectId) {
         List<DataSetDO> list=metaService.getDataSetList(projectId);
         return new ResultBody(list);
@@ -57,7 +54,7 @@ public class ProjectController {
             @ApiImplicitParam(name = "projectId", value = "项目ID", required = true, dataType = "long"),
             @ApiImplicitParam(name = "datasetId", value = "数据集ID", required = true, dataType = "long")
     })
-    @RequestMapping(value="/{projectId}/datasets/{datasetId}", method = RequestMethod.GET)
+    @GetMapping("/{projectId}/datasets/{datasetId}")
     public ResultBody getDataset(
             @PathVariable("projectId") long projectId,
             @PathVariable("datasetId") long datasetId) {

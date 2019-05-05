@@ -1,15 +1,14 @@
 package com.guangmushikong.lbi.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.guangmushikong.lbi.service.XYZService;
+import com.guangmushikong.lbi.model.ServiceType;
+import com.guangmushikong.lbi.model.TileMap;
+import com.guangmushikong.lbi.service.TileService;
 import com.lbi.model.Tile;
-import com.lbi.util.ImageUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +20,8 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/xyz")
 public class XYZController {
-    @Resource(name="xyzService")
-    XYZService xyzService;
+    @Resource(name="tileService")
+    TileService tileService;
 
     @ApiOperation(value = "XYZ瓦片地图服务", notes = "获取XYZ瓦片")
     @ApiImplicitParams({
@@ -41,45 +40,30 @@ public class XYZController {
             @PathVariable("y") long y,
             @PathVariable("z") int z,
             @PathVariable("extension") String extension) {
-
         Tile tile=new Tile(x,y,z);
-        int alterY=new Double(Math.pow(2,z)-1-y).intValue();
-        tile.setY(alterY);
         String[] args=tileset.split("@");
+        TileMap tileMap=tileService.getTileMapById(ServiceType.XYZ.getValue(),args[0],args[1],args[2]);
+        byte[] bytes;
+        ResponseEntity.BodyBuilder bodyBuilder=ResponseEntity.ok();
         if(extension.equalsIgnoreCase("geojson")
                 ||extension.equalsIgnoreCase("json")){
-            tile=new Tile(x,y,z);
-            String layerName=args[0];
-            if(layerName.equalsIgnoreCase("china_city_polygon")){
-                JSONArray body=xyzService.getCityRegionByTile(tile);
-                if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-            }else if(layerName.equalsIgnoreCase("liupanshui_extent_line")) {
-                JSONArray body=xyzService.getLPSByTile("liupanshui_extent_line","green",tile);
-                if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-            }else if(layerName.equalsIgnoreCase("liupanshui_track_line")) {
-                JSONArray body=xyzService.getLPSByTile("liupanshui_track_line","yellow",tile);
-                if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-            }else if(layerName.equalsIgnoreCase("liupanshui_point")) {
-                JSONArray body=xyzService.getLPSByTile("liupanshui_point","red",tile);
-                if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-            }else{
-                String body=xyzService.getCacheJsonTile(version,args[0],args[1],args[2],tile);
-                if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
+            bytes=tileService.getTile(tileMap,tile);
+            bodyBuilder.contentType(MediaType.APPLICATION_JSON);
+        }else{
+            int alterY=new Double(Math.pow(2,z)-1-y).intValue();
+            tile.setY(alterY);
+            bytes=tileService.getTile(tileMap,tile);
+            if("png".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.IMAGE_PNG);
+            }else if("jpeg".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
+            }else if("tif".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.valueOf("image/tif"));
+            }else if("terrain".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.valueOf("application/vnd.quantized-mesh"));
             }
-        }else if(extension.equalsIgnoreCase("png")){
-            byte[] bytes=xyzService.getXYZ_Tile(version,args[0],args[1],args[2],tile);
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(bytes);
-        }else if(extension.equalsIgnoreCase("jpeg")){
-            byte[] bytes=xyzService.getXYZ_Tile(version,args[0],args[1],args[2],tile);
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
-        }else if(extension.equalsIgnoreCase("tif")){
-            byte[] bytes=xyzService.getXYZ_Tile(version,args[0],args[1],args[2],tile);
-            return ResponseEntity.ok().contentType(MediaType.valueOf("image/tif")).body(bytes);
-        }else if(extension.equalsIgnoreCase("terrain")){
-            byte[] bytes=xyzService.getXYZ_Tile(version,args[0],args[1],args[2],tile);
-            return ResponseEntity.ok().contentType(MediaType.valueOf("application/terrain")).body(bytes);
         }
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        return bodyBuilder.body(bytes);
     }
 
     @ApiOperation(value = "XYZ瓦片地图服务", notes = "获取XYZ瓦片")
@@ -98,47 +82,33 @@ public class XYZController {
             @PathVariable("z") int z,
             @PathVariable("extension") String extension) {
         Tile tile=new Tile(x,y,z);
-        if(extension.equalsIgnoreCase("json")){
-            JSONArray body=null;
-            if(layerName.equalsIgnoreCase("gujiao_contour50_line")){
-                body=xyzService.getGujiaoContour50ByTile(tile);
-            }else if(layerName.equalsIgnoreCase("gujiao_contour100_line")){
-                body=xyzService.getGujiaoContour100ByTile(tile);
-            }else if(layerName.equalsIgnoreCase("gujiao_contour200_line")){
-                body=xyzService.getGujiaoContour200ByTile(tile);
-            }else if(layerName.equalsIgnoreCase("city")){
-                body=xyzService.getCityRegionByTile(tile);
-            }else if(layerName.equalsIgnoreCase("liupanshui_extent_line")){
-                body=xyzService.getLPSByTile("liupanshui_extent_line","green",tile);
-            }else if(layerName.equalsIgnoreCase("liupanshui_point")){
-                body=xyzService.getLPSByTile("liupanshui_point","red",tile);
-            }else if(layerName.equalsIgnoreCase("liupanshui_track_line")){
-                body=xyzService.getLPSByTile("liupanshui_track_line","yellow",tile);
+        TileMap tileMap=tileService.getTileMapById(ServiceType.XYZ.getValue(),layerName,extension);
+        byte[] bytes;
+        ResponseEntity.BodyBuilder bodyBuilder=ResponseEntity.ok();
+        if(extension.equalsIgnoreCase("json")
+                || extension.equalsIgnoreCase("geojson")){
+            bytes=tileService.getTile(tileMap,tile);
+            bodyBuilder.contentType(MediaType.APPLICATION_JSON);
+        }else{
+            int alterY=new Double(Math.pow(2,z)-1-y).intValue();
+            tile.setY(alterY);
+            if(layerName.equalsIgnoreCase("gujiao")){
+                layerName="gujiao_satellite_raster";
+            } else if(layerName.equalsIgnoreCase("city")){
+                layerName="china_city_polygon";
+            } else if(layerName.equalsIgnoreCase("world")){
+                layerName="world_satellite_raster";
             }
-            if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-        }else if(extension.equalsIgnoreCase("png")){
-            if(layerName.equalsIgnoreCase("gujiao"))layerName="gujiao_satellite_raster";
-            else if(layerName.equalsIgnoreCase("city"))layerName="china_city_polygon";
-            int alterY=new Double(Math.pow(2,z)-1-y).intValue();
-            tile.setY(alterY);
-            byte[] bytes=xyzService.getXYZ_Tile(layerName,extension,tile);
-            if(bytes==null)bytes= ImageUtil.emptyImage();
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(bytes);
-        }else if(extension.equalsIgnoreCase("jpeg")){
-            if(layerName.equalsIgnoreCase("world"))layerName="world_satellite_raster";
-            int alterY=new Double(Math.pow(2,z)-1-y).intValue();
-            tile.setY(alterY);
-            byte[] bytes=xyzService.getXYZ_Tile(layerName,extension,tile);
-            if(bytes==null)bytes= ImageUtil.emptyImage();
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
-        }else if(extension.equalsIgnoreCase("tif")){
-            int alterY=new Double(Math.pow(2,z)-1-y).intValue();
-            tile.setY(alterY);
-            byte[] bytes=xyzService.getXYZ_Tile(layerName,extension,tile);
-            if(bytes==null)bytes=ImageUtil.emptyImage();
-            return ResponseEntity.ok().contentType(MediaType.valueOf("image/tif")).body(bytes);
+            bytes=tileService.getTile(tileMap,tile);
+            if("png".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.IMAGE_PNG);
+            }else if("jpeg".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
+            }else if("tif".equalsIgnoreCase(extension)){
+                bodyBuilder.contentType(MediaType.valueOf("image/tif"));
+            }
         }
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        return bodyBuilder.body(bytes);
     }
 
     @ApiOperation(value = "等高线瓦片瓦片地图服务", notes = "获取XYZ等高线瓦片")
@@ -147,15 +117,15 @@ public class XYZController {
             @ApiImplicitParam(name = "y", value = "瓦片Y值", required = true, dataType = "long"),
             @ApiImplicitParam(name = "z", value = "瓦片Z值", required = true, dataType = "int")
     })
-    @RequestMapping(value="/contour/{x}/{y}/{z}.json",method = RequestMethod.GET)
-    public ResponseEntity getContour(
+    @GetMapping(value = "/contour/{x}/{y}/{z}.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JSONObject getContour(
             @PathVariable("x") long x,
             @PathVariable("y") long y,
             @PathVariable("z") int z){
         Tile tile=new Tile(x,y,z);
-        JSONObject body=xyzService.getJingZhuangContourByTile(tile);
-        if(body!=null)return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        JSONObject body=new JSONObject();
+        //JSONObject body=xyzService.getJingZhuangContourByTile(tile);
+        return body;
     }
 
 }

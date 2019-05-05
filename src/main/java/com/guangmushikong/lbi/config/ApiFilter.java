@@ -21,6 +21,10 @@ public class ApiFilter implements Filter {
     @Resource(name="logDao")
     LogDao logDao;
 
+    @Override
+    public void init(FilterConfig filterConfig) {}
+
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request=(HttpServletRequest)req;
 
@@ -64,12 +68,15 @@ public class ApiFilter implements Filter {
             logDao.addLog(remoteAddr,url,method,duration);
         }
     }
-    public void init(FilterConfig filterConfig) {}
 
+    @Override
     public void destroy() {}
 
     private String getRemortIP(HttpServletRequest request) {
-        if (request.getHeader("x-forwarded-for") == null) return request.getRemoteAddr();
-        else return request.getHeader("x-forwarded-for");
+        if (request.getHeader("x-forwarded-for") == null) {
+            return request.getRemoteAddr();
+        } else{
+            return request.getHeader("x-forwarded-for");
+        }
     }
 }

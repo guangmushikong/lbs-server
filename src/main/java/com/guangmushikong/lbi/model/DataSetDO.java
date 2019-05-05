@@ -1,8 +1,8 @@
 package com.guangmushikong.lbi.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
@@ -13,8 +13,7 @@ import java.util.List;
  * @create 2018/8/26
  * @since 1.0.0
  ************************************/
-@Getter
-@Setter
+@Data
 public class DataSetDO {
     /**
      * ID，主键
@@ -24,6 +23,7 @@ public class DataSetDO {
      * 地图ID
      */
     @JSONField(serialize=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     long mapId;
     /**
      * 名称
@@ -55,12 +55,14 @@ public class DataSetDO {
      */
     //@JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
     @JSONField(serialize=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     Date createTime;
     /**
      * 修改时间
      */
     //@JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
     @JSONField(serialize=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     Date modifyTime;
 
     List<TileMap> maps;
