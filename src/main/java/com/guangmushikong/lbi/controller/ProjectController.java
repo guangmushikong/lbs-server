@@ -24,9 +24,7 @@ public class ProjectController {
     @GetMapping("")
     public ResultBody getProjectList() {
         List<ProjectDO> list=metaService.getProjectList();
-        ResultBody result=new ResultBody();
-        if(!list.isEmpty())result.setData(list);
-        return result;
+        return new ResultBody(list);
     }
 
     @ApiOperation(value = "项目信息", notes = "获取项目信息", produces = "application/json")
@@ -46,6 +44,13 @@ public class ProjectController {
     @GetMapping("/{projectId}/datasets")
     public ResultBody getDatasetList(@PathVariable("projectId") long projectId) {
         List<DataSetDO> list=metaService.getDataSetList(projectId);
+        return new ResultBody(list);
+    }
+
+    @ApiOperation(value = "全部数据集列表", notes = "获取数据集列表", produces = "application/json")
+    @GetMapping("/{projectId}/alldatasets")
+    public ResultBody getAllatasetList(@PathVariable("projectId") long projectId) {
+        List<DataSetDO> list=metaService.getDataSetList();
         return new ResultBody(list);
     }
 

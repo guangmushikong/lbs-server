@@ -155,6 +155,10 @@ public class MetaService {
         return result;
     }
 
+    public List<DataSetDO> getDataSetList(){
+        return metaDao.getDataSetList();
+    }
+
     public DataSetDO getDataSetById(long id){
         return metaDao.getDataSetById(id);
     }

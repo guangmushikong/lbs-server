@@ -54,15 +54,15 @@ public class DataSetDO {
      * 创建时间
      */
     //@JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
-    @JSONField(serialize=false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    //@JSONField(serialize=false)
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     Date createTime;
     /**
      * 修改时间
      */
     //@JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
-    @JSONField(serialize=false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    //@JSONField(serialize=false)
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     Date modifyTime;
 
     List<TileMap> maps;

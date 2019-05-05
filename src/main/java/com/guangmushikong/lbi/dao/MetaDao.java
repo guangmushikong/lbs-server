@@ -137,6 +137,13 @@ public class MetaDao extends CommonDao{
         );
     }
 
+    public List<DataSetDO> getDataSetList(){
+        String sql="select * from "+t_dataset+" order by name";
+        return jdbcTemplate.query(
+                sql,
+                (rs,rowNum)->toDataSetDO(rs));
+    }
+
     public List<DataSetDO> getDataSetList(long projectId){
         StringBuilder sb=new StringBuilder();
         sb.append("select * from "+t_dataset);
