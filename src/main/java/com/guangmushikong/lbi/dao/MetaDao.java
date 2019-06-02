@@ -174,7 +174,7 @@ public class MetaDao extends CommonDao{
         u.setAbstract(rs.getString("abstract"));
         u.setVersion(rs.getString("version"));
         String href=rs.getString("href");
-        href=href.replace("${mapserver}",mapserver+"/service");
+        href=href.replace("${mapserver}",mapserver);
         u.setHref(href);
         u.setKind(rs.getInt("kind"));
         return u;
@@ -190,7 +190,7 @@ public class MetaDao extends CommonDao{
         u.setSrs(rs.getString("srs"));
         u.setProfile(rs.getString("profile"));
         String href=rs.getString("href");
-        href=href.replace("${mapserver}",mapserver+"/service");
+        href=href.replace("${mapserver}",mapserver);
         u.setHref(href);
 
         u.setMinX(rs.getDouble("minx"));

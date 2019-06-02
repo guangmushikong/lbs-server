@@ -18,7 +18,7 @@ import javax.annotation.Resource;
 
 @Api(value = "瓦片服务资源接口", tags = "Service", description = "瓦片服务资源相关接口")
 @RestController
-@RequestMapping("/service")
+//@RequestMapping("/service")
 public class ServiceController {
     @Resource(name="metaService")
     MetaService metaService;

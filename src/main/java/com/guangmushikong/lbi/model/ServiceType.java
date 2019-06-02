@@ -13,8 +13,10 @@ public enum  ServiceType {
         return this.value;
     }
     public static ServiceType getByValue(int value) {
-        for(ServiceType val :values()){
-            return val;
+        for(ServiceType type :values()){
+            if(type.getValue()==value){
+                return type;
+            }
         }
         return null;
     }

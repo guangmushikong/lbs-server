@@ -42,7 +42,7 @@ public class MetaService {
             u.setAbstract(nService.getAbstract());
         }
         //parent href
-        u.setServices("http://"+mapserver+"/service");
+        u.setServices("http://"+mapserver);
         //child list
         List<TileMap> tileMapList=metaDao.getTileMapList(serviceId);
         List<Node_TileMap> nTileMapList=tileMapList

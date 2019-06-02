@@ -57,6 +57,8 @@ public class TileService {
             return getCacheTimeTile(tileMap,tile);
         }else if(mapKind==MapKind.PGLayer){
             return getPGLayerTile(tileMap,tile);
+        }else if(mapKind==MapKind.XYZLayer){
+            return getXYZTile(tileMap,tile);
         }else {
             return null;
         }
@@ -133,5 +135,31 @@ public class TileService {
         FeatureCollectionVO result=new FeatureCollectionVO();
         result.setFeatures(featureList);
         return JSON.toJSONBytes(result);
+    }
+
+    private byte[] getXYZTile(TileMap tileMap, Tile tile){
+        try{
+            int alterY=new Double(Math.pow(2,tile.getZ())-1-tile.getY()).intValue();
+            tile.setY(alterY);
+            StringBuilder sb=new StringBuilder();
+            sb.append(tiledata);
+            sb.append(File.separator).append(tileMap.getTitle());
+            sb.append(File.separator).append(tile.getZ());
+            sb.append(File.separator).append(tile.getX());
+            sb.append(File.separator).append(tile.getY());
+            sb.append(".").append(tileMap.getFileExtension());
+            String path=sb.toString();
+            //System.out.println(tile.getX()+","+tile.getY()+","+tile.getZ()+"|"+path);
+            if(tileMap.getExtension().equalsIgnoreCase("tif")
+                    || tileMap.getExtension().equalsIgnoreCase("geojson")
+                    || tileMap.getExtension().equalsIgnoreCase("terrain")){
+                return CommonUtil.fileToByteArray(path);
+            }else {
+                return CommonUtil.imageToByteArray(path);
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

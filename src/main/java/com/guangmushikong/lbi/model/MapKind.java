@@ -9,7 +9,8 @@ public enum MapKind {
     OSSTimeCache(3,"OSS时序缓存图片"),
     LocalCache(4,"本地缓存图片"),
     LocalTimeCache(5,"本地时序缓存图片"),
-    PGLayer(6,"PG图层");
+    PGLayer(6,"PG图层"),
+    XYZLayer(7,"XYZ图层");
 
     int code;
     String msg;
