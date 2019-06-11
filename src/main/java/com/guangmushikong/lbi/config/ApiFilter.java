@@ -15,7 +15,7 @@ import java.util.Enumeration;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 
-@WebFilter
+//@WebFilter
 @Slf4j
 public class ApiFilter implements Filter {
     @Resource(name="logDao")

@@ -3,6 +3,10 @@ server:
   compression:
     enabled: true
     mime-types: application/json,application/vnd.quantized-mesh
+spring:
+  table:
+    t_sys_role: t_sys_role
+    t_sys_user: t_sys_user
 ################### 应用配置
 info:
   version: 0.0.1

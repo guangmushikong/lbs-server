@@ -2,6 +2,13 @@
          xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
     <diskStore path="user.dir/cache" />
 
+    <cache name="userCache"
+           maxElementsInMemory="1000"
+           eternal="false"
+           timeToIdleSeconds="120"
+           timeToLiveSeconds="600"
+           overflowToDisk="false"/>
+
     <cache
             name="tileMapCache"
             eternal="false"
