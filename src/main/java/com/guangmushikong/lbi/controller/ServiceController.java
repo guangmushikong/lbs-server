@@ -11,6 +11,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +20,10 @@ import javax.annotation.Resource;
 
 @Api(value = "瓦片服务资源接口", tags = "Service", description = "瓦片服务资源相关接口")
 @RestController
+@RequestMapping("/service")
+@Slf4j
 public class ServiceController {
-    @Resource(name="metaService")
+    @Autowired
     MetaService metaService;
 
     @ApiOperation(value = "地图服务类型列表", notes = "获取地图服务类型列表", produces = "application/xml")
@@ -38,6 +42,7 @@ public class ServiceController {
     public Root_TileMapService getTileMapService(
             @PathVariable("service") String service,
             @PathVariable("version") String version) {
+        log.info("【getTileMapService】service:{},version:{}",service,version);
         Root_TileMapService u=null;
         ServiceType type=ServiceType.valueOf(service.toUpperCase());
         if(type==ServiceType.XYZ){

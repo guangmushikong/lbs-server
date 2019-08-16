@@ -1,10 +1,8 @@
 package com.guangmushikong.lbi.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class ResultBody<T> {
     boolean success=false;
     /**

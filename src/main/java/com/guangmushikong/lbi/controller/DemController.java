@@ -1,8 +1,8 @@
 package com.guangmushikong.lbi.controller;
 
 import com.guangmushikong.lbi.model.ContourPoint;
-import com.guangmushikong.lbi.service.RefactorDemService;
-import com.lbi.model.ResultBody;
+import com.guangmushikong.lbi.model.ResultBody;
+import com.guangmushikong.lbi.service.DemService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
+import static com.guangmushikong.lbi.model.LBSConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,14 +20,14 @@ import java.util.List;
 @RequestMapping("/dem")
 public class DemController {
     @Autowired
-    RefactorDemService refactorDemService;
+    DemService demService;
 
     @ApiOperation(value = "剖面等高线", notes = "获取等高线列表", produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "layerName", value = "图层", dataType = "string"),
             @ApiImplicitParam(name = "xys", value = "剖面曲线", required = true, dataType = "string")
     })
-    @RequestMapping(value="/contour",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value="/contour",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResultBody contour(
             @RequestParam(value = "layerName",defaultValue = "") String layerName,
             @RequestParam("xys") String xys) {
@@ -35,8 +35,7 @@ public class DemController {
             if(StringUtils.isNoneEmpty(xys)){
                 String[] arr=xys.split(";");
                 List<ContourPoint> ptList=new ArrayList<>();
-                for(int i=0;i<arr.length;i++){
-                    String tmp=arr[i];
+                for(String tmp:arr){
                     String[] pts=tmp.split(",");
                     double x=Double.parseDouble(pts[0]);
                     double y=Double.parseDouble(pts[1]);
@@ -46,15 +45,11 @@ public class DemController {
                     pt.setKind(1);
                     ptList.add(pt);
                 }
+                if(StringUtils.isEmpty(layerName)){
+                    layerName=GUJIAO;
+                }
                 if(ptList.size()>0){
-                    List<ContourPoint> list;
-                    if(layerName.equalsIgnoreCase("jingzhuang")){
-                        list=refactorDemService.getHeight_jingzhuang(ptList);
-                    }else if(layerName.equalsIgnoreCase("gujiao")){
-                        list=refactorDemService.getHeight_gujiao(ptList);
-                    }else {
-                        list=refactorDemService.getHeight_gujiao(ptList);
-                    }
+                    List<ContourPoint> list=demService.listContourPoint(ptList,layerName);
                     return new ResultBody<>(list);
                 }else{
                     return new ResultBody<>(-1,"xys数据不能为空");

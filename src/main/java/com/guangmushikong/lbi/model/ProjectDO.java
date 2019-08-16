@@ -14,7 +14,7 @@ public class ProjectDO {
     /**
      * ID，主键
      */
-    long id;
+    Long id;
     /**
      * 名称
      */
@@ -25,6 +25,10 @@ public class ProjectDO {
      */
     @ApiModelProperty(value = "备注")
     String memo;
+    /**
+     * 数据集ID
+     */
+    String datasetIds;
     /**
      * 创建时间
      */

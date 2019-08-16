@@ -8,7 +8,6 @@ import lombok.Setter;
 /*************************************
  * Class Name: ContourPoint
  * Description:〈等高线点〉
- * @create 2018/6/19
  * @since 1.0.0
  ************************************/
 @Getter

@@ -2,19 +2,21 @@ package com.guangmushikong.lbi.dao;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.lbi.model.Tile;
 import com.guangmushikong.lbi.model.*;
-import com.lbi.util.TileSystem;
+
+import com.guangmushikong.lbi.util.TileSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository(value="tileDao")
+@Repository
+@Slf4j
 public class TileDao extends CommonDao{
     final GeometryFactory GEO_FACTORY=new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),4326);
 
@@ -27,15 +29,16 @@ public class TileDao extends CommonDao{
         }else {
             field= "*";
         }
-        String enveSql="ST_MakeEnvelope("+enve.getMinX()+","+enve.getMinY()+","+enve.getMaxX()+","+enve.getMaxY()+",4326)";
+        String enveSql=String.format("ST_MakeEnvelope(%f,%f,%f,%f,4326)",enve.getMinX(),enve.getMinY(),enve.getMaxX(),enve.getMaxY());
         field+=",ST_AsGeoJSON(st_clipbybox2d(geom,"+enveSql+")) as geojson";
-        String sql="select "+field+" from "+tableName;
-        sql+=" where st_intersects(st_geomfromtext('"+grid.toText()+"',4326),ST_Transform(geom,4326))";
-        //System.out.println("sql:"+sql);
+        String sql=String.format("select %s from data.%s where st_intersects(st_geomfromtext('%s',4326),ST_Transform(geom,4326))",field,tableName,grid.toText());
+        log.info("【sql】{}",sql);
         return jdbcTemplate.query(
                 sql,
                 (rs,rowNum)->{
                     FeatureVO u=new FeatureVO();
+                    u.setType("Feature");
+
                     JSONObject properties=new JSONObject();
                     if(prop!=null){
                         properties=prop;
@@ -46,17 +49,18 @@ public class TileDao extends CommonDao{
                             properties.put(key,val);
                         }
                     }
-                    String geojsonStr=rs.getString("geojson");
-                    JSONObject geojson=JSONObject.parseObject(geojsonStr);
-                    u.setType("Feature");
                     if(!properties.isEmpty()){
                         u.setProperties(properties);
                     }
+
+                    String geojsonStr=rs.getString("geojson");
+                    JSONObject geojson=JSONObject.parseObject(geojsonStr);
                     GeometryVO geometryVO=new GeometryVO();
                     geometryVO.setType(geojson.getString("type"));
                     JSONArray coordinates=geojson.getJSONArray("coordinates");
                     geometryVO.setCoordinates(coordinates);
                     u.setGeometry(geometryVO);
+
                     return u;
                 });
     }

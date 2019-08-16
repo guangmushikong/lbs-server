@@ -7,7 +7,6 @@ import lombok.Data;
 /*************************************
  * Class Name: FeatureVO
  * Description:〈要素对象〉
- * @create 2018/5/14
  * @since 1.0.0
  ************************************/
 @Data

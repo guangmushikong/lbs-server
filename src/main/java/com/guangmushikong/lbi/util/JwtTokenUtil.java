@@ -1,11 +1,10 @@
-package com.guangmushikong.lbi.config;
+package com.guangmushikong.lbi.util;
 
 import com.guangmushikong.lbi.model.SysUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -16,7 +15,6 @@ import java.util.Map;
 /**
  * JWT 工具类
  */
-@Component
 public class JwtTokenUtil implements Serializable {
 
     private static final String CLAIM_KEY_USERNAME = "sub";
@@ -35,7 +33,7 @@ public class JwtTokenUtil implements Serializable {
     /**
      * 签发JWT
      */
-    public String generateToken(UserDetails userDetails) {
+    public static String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>(16);
         claims.put( CLAIM_KEY_USERNAME, userDetails.getUsername() );
         return Jwts.builder()
@@ -48,7 +46,7 @@ public class JwtTokenUtil implements Serializable {
     /**
      * 验证JWT
      */
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public static Boolean validateToken(String token, UserDetails userDetails) {
         SysUser user = (SysUser) userDetails;
         String username = getUsernameFromToken( token );
 
@@ -58,7 +56,7 @@ public class JwtTokenUtil implements Serializable {
     /**
      * 获取token是否过期
      */
-    public Boolean isTokenExpired(String token) {
+    public static Boolean isTokenExpired(String token) {
         Date expiration = getExpirationDateFromToken( token );
         return expiration.before( new Date() );
     }
@@ -66,15 +64,15 @@ public class JwtTokenUtil implements Serializable {
     /**
      * 根据token获取username
      */
-    public String getUsernameFromToken(String token) {
-        String username = getClaimsFromToken( token ).getSubject();
+    public static String getUsernameFromToken(String token) {
+        String username = getClaimsFromToken(token).getSubject();
         return username;
     }
 
     /**
      * 获取token的过期时间
      */
-    public Date getExpirationDateFromToken(String token) {
+    public static Date getExpirationDateFromToken(String token) {
         Date expiration = getClaimsFromToken( token ).getExpiration();
         return expiration;
     }
@@ -82,14 +80,11 @@ public class JwtTokenUtil implements Serializable {
     /**
      * 解析JWT
      */
-    private Claims getClaimsFromToken(String token) {
+    private static Claims getClaimsFromToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey( SECRET )
                 .parseClaimsJws( token )
                 .getBody();
         return claims;
     }
-
-
-
 }

@@ -10,7 +10,6 @@ import java.util.List;
 /*************************************
  * Class Name: DataSetDO
  * Description:〈数据集〉
- * @create 2018/8/26
  * @since 1.0.0
  ************************************/
 @Data

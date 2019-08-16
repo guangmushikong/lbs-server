@@ -2,22 +2,26 @@ package com.guangmushikong.lbi.service;
 
 import com.google.common.collect.Lists;
 import com.guangmushikong.lbi.dao.MetaDao;
+import com.guangmushikong.lbi.dao.UserDao;
 import com.guangmushikong.lbi.model.*;
 import com.guangmushikong.lbi.model.xml.*;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service("metaService")
+@Service
 public class MetaService {
-    @Resource(name="metaDao")
-    private MetaDao metaDao;
+    @Autowired
+    MetaDao metaDao;
+    @Autowired
+    UserDao userDao;
+
     @Value("${service.mapserver}")
     String mapserver;
 
@@ -129,30 +133,44 @@ public class MetaService {
         return metaDao.getProjectList();
     }
 
+    public List<ProjectDO> getProjectList(String userName){
+        SysUser sysUser=userDao.findByUsername(userName);
+        if(sysUser!=null && StringUtils.isNotEmpty(sysUser.getProjectIds())){
+            return metaDao.getProjectList(sysUser.getProjectIds());
+        }else {
+            return Lists.newArrayList();
+        }
+    }
+
     public ProjectDO getProjectById(long id){
         return metaDao.getProjectById(id);
     }
 
     public List<DataSetDO> getDataSetList(long projectId){
-        List<DataSetDO> list= metaDao.getDataSetList(projectId);
-        //分组
-        Map<String,List<DataSetDO>> groupDict=list
-                .stream()
-                .collect(Collectors.groupingBy(DataSetDO::getName));
+        ProjectDO projectDO=metaDao.getProjectById(projectId);
+        if(projectDO!=null && StringUtils.isNotEmpty(projectDO.getDatasetIds())){
+            List<DataSetDO> list= metaDao.getDataSetList(projectDO.getDatasetIds());
+            //分组
+            Map<String,List<DataSetDO>> groupDict=list
+                    .stream()
+                    .collect(Collectors.groupingBy(DataSetDO::getName));
 
-        List<DataSetDO> result=Lists.newArrayList();
-        for(String name:groupDict.keySet()){
-            List<DataSetDO> dataSetList=groupDict.get(name);
-            List<Long> idList=new ArrayList<>();
-            for(DataSetDO dataSet:dataSetList){
-                idList.add(dataSet.getMapId());
+            List<DataSetDO> result=Lists.newArrayList();
+            for(String name:groupDict.keySet()){
+                List<DataSetDO> dataSetList=groupDict.get(name);
+                List<Long> idList=new ArrayList<>();
+                for(DataSetDO dataSet:dataSetList){
+                    idList.add(dataSet.getMapId());
+                }
+                DataSetDO dataSetDO=dataSetList.get(0);
+                List<TileMap> mapList=metaDao.getTileMapList(idList);
+                dataSetDO.setMaps(mapList);
+                result.add(dataSetDO);
             }
-            DataSetDO dataSetDO=dataSetList.get(0);
-            List<TileMap> mapList=metaDao.getTileMapList(idList);
-            dataSetDO.setMaps(mapList);
-            result.add(dataSetDO);
+            return result;
+        }else {
+            return Lists.newArrayList();
         }
-        return result;
     }
 
     public List<DataSetDO> getDataSetList(){

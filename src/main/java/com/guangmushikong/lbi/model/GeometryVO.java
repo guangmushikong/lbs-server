@@ -8,7 +8,6 @@ import lombok.Setter;
 /*************************************
  * Class Name: GeometryVO
  * Description:〈几何对象〉
- * @create 2018/5/14
  * @since 1.0.0
  ************************************/
 @Getter

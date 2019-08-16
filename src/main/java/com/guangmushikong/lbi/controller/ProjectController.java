@@ -1,29 +1,39 @@
 
 package com.guangmushikong.lbi.controller;
 
-
+import com.guangmushikong.lbi.config.JwtTokenFilter;
 import com.guangmushikong.lbi.model.*;
 import com.guangmushikong.lbi.service.MetaService;
+import com.guangmushikong.lbi.util.JwtTokenUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Api(value = "项目管理接口", tags = "Project", description = "项目管理管理相关接口")
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-    @Resource(name="metaService")
+    @Autowired
     MetaService metaService;
 
     @ApiOperation(value = "项目列表", notes = "获取项目列表", produces = "application/json")
     @GetMapping("")
-    public ResultBody getProjectList() {
-        List<ProjectDO> list=metaService.getProjectList();
+    public ResultBody getProjectList(HttpServletRequest request) {
+        String token=request.getHeader(JwtTokenFilter.HEADER_STRING);
+        String username = JwtTokenUtil.getUsernameFromToken(token);
+        List<ProjectDO> list;
+        if(StringUtils.isNotEmpty(username)){
+            list=metaService.getProjectList(username);
+        }else {
+            list=metaService.getProjectList();
+        }
         return new ResultBody(list);
     }
 

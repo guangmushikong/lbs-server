@@ -1,5 +1,6 @@
-import com.lbi.model.Tile;
-import com.lbi.util.TileSystem;
+
+import com.guangmushikong.lbi.model.Tile;
+import com.guangmushikong.lbi.util.TileSystem;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;

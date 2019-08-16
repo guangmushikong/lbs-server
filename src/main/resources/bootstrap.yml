@@ -3,14 +3,11 @@ spring:
     name: lbs-server
   cloud:
     config:
-      name: lbi-tile,database-config
+      name: lbs-server,database-config
       profile: dev
       discovery:
         enabled: true
         service-id: config-server
-  mvc:
-    favicon:
-      enabled: true
   security:
     user:
       name: AKIAPYRXF3VSENILA42Q

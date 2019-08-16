@@ -1,19 +1,18 @@
 package com.guangmushikong.lbi.controller;
 
+import com.guangmushikong.lbi.model.ResultBody;
 import com.guangmushikong.lbi.service.AuthService;
-import com.lbi.model.ResultBody;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Resource(name="authService")
+    @Autowired
     private AuthService authService;
 
 

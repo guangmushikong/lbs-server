@@ -1,10 +1,10 @@
 package com.guangmushikong.lbi.dao;
 
 import com.guangmushikong.lbi.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -12,7 +12,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-@Repository(value="metaDao")
+@Repository
+@Slf4j
 public class MetaDao extends CommonDao{
     @Value("${service.mapserver}")
     String mapserver;
@@ -28,21 +29,25 @@ public class MetaDao extends CommonDao{
     String t_dataset;
 
     public List<TileMapService> getTileMapServiceList(){
-        String sql="select * from "+t_tilemapservice+" order by id";
+        String sql=String.format("select * from %s order by id",t_tilemapservice);
         return jdbcTemplate.query(
                 sql,
                 (rs,rowNum)->toTileMapService(rs));
     }
 
     public TileMapService getTileMapServiceById(long serviceId){
-        String sql="select * from "+t_tilemapservice+" where id=?";
-        return DataAccessUtils.requiredSingleResult(
-                jdbcTemplate.query(
-                        sql,
-                        new Object[]{serviceId},
-                        new int[]{Types.BIGINT},
-                        (rs,rowNum)->toTileMapService(rs))
-        );
+        String sql=String.format("select * from %s where id=?",t_tilemapservice);
+        List<TileMapService> list=jdbcTemplate.query(
+                sql,
+                new Object[]{serviceId},
+                new int[]{Types.BIGINT},
+                (rs,rowNum)->toTileMapService(rs));
+
+        if(list.isEmpty()){
+            return null;
+        }else {
+            return list.get(0);
+        }
     }
 
     public List<TileMap> getTileMapList(long serviceId){
@@ -52,6 +57,7 @@ public class MetaDao extends CommonDao{
         sb.append(" on t1.id=t2.map_id");
         sb.append(" where t1.service_id=?");
         sb.append(" order by t1.title,t1.layer_group");
+        //log.info("【sql】{}",sb.toString());
         return jdbcTemplate.query(
                 sb.toString(),
                 new Object[]{serviceId},
@@ -67,20 +73,24 @@ public class MetaDao extends CommonDao{
         sb.append(" on t1.id=t2.map_id");
         sb.append(" where t1.id in ("+ StringUtils.join(ids,",")+")");
         sb.append(" order by t1.title,t1.layer_group");
+        //log.info("【sql】{}",sb.toString());
         return jdbcTemplate.query(
                 sb.toString(),
                 (rs,rowNum)->toTileMap(rs));
     }
 
     public TileMap getTileMapById(long id){
-        String sql="select * from "+t_tilemap+" where id=?";
-        return DataAccessUtils.requiredSingleResult(
-                jdbcTemplate.query(
-                        sql,
-                        new Object[]{id},
-                        new int[]{Types.BIGINT},
-                        (rs,rowNum)->toTileMap(rs))
-        );
+        String sql=String.format("select * from %s where id=?",t_tilemap);
+        List<TileMap> list=jdbcTemplate.query(
+                sql,
+                new Object[]{id},
+                new int[]{Types.BIGINT},
+                (rs,rowNum)->toTileMap(rs));
+        if(list.isEmpty()){
+            return null;
+        }else {
+            return list.get(0);
+        }
     }
 
     @Cacheable(value = "tileMapCache",key = "'tileMap_'+#serviceId+#title+#srs+#extension")
@@ -90,26 +100,29 @@ public class MetaDao extends CommonDao{
             String srs,
             String extension){
         String sql="select * from "+t_tilemap+" where service_id=? and title=? and srs=? and extension=?";
-        return DataAccessUtils.requiredSingleResult(
-                jdbcTemplate.query(
-                        sql,
-                        new Object[]{
-                                serviceId,
-                                title,
-                                srs,
-                                extension
-                        },
-                        new int[]{
-                                Types.BIGINT,
-                                Types.VARCHAR,
-                                Types.VARCHAR,
-                                Types.VARCHAR,
-                        },
-                        (rs,rowNum)->toTileMap(rs))
-        );
+        List<TileMap> list=jdbcTemplate.query(
+                sql,
+                new Object[]{
+                        serviceId,
+                        title,
+                        srs,
+                        extension
+                },
+                new int[]{
+                        Types.BIGINT,
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                },
+                (rs,rowNum)->toTileMap(rs));
+        if(list.isEmpty()){
+            return null;
+        }else {
+            return list.get(0);
+        }
     }
     public List<TileSet> getTileSetList(long mapId){
-        String sql="select * from "+t_tileset+" where map_id=? order by sort_order";
+        String sql=String.format("select * from %s where map_id=? order by sort_order",t_tileset);
         return jdbcTemplate.query(
                 sql,
                 new Object[]{mapId},
@@ -118,53 +131,52 @@ public class MetaDao extends CommonDao{
     }
 
     public List<ProjectDO> getProjectList(){
-        StringBuilder sb=new StringBuilder();
-        sb.append("select * from "+t_project);
-        sb.append(" order by id");
-        return jdbcTemplate.query(
-                sb.toString(),
-                (rs,rowNum)->toProjectDO(rs));
+        String sql=String.format("select * from %s order by id",t_project);
+        return jdbcTemplate.query(sql, (rs,rowNum)->toProjectDO(rs));
+    }
+
+    public List<ProjectDO> getProjectList(String ids){
+        String sql=String.format("select * from %s where id in (%s) order by id",t_project,ids);
+        return jdbcTemplate.query(sql,(rs,rowNum)->toProjectDO(rs));
     }
 
     public ProjectDO getProjectById(long id){
-        String sql="select * from "+t_project+" where id=?";
-        return DataAccessUtils.requiredSingleResult(
-                jdbcTemplate.query(
-                        sql,
-                        new Object[]{id},
-                        new int[]{Types.BIGINT},
-                        (rs,rowNum)->toProjectDO(rs))
-        );
+        String sql=String.format("select * from %s where id=?",t_project);
+        List<ProjectDO> list=jdbcTemplate.query(
+                sql,
+                new Object[]{id},
+                new int[]{Types.BIGINT},
+                (rs,rowNum)->toProjectDO(rs));
+
+        if(list.isEmpty()){
+            return null;
+        }else {
+            return list.get(0);
+        }
     }
 
     public List<DataSetDO> getDataSetList(){
-        String sql="select * from "+t_dataset+" order by name";
-        return jdbcTemplate.query(
-                sql,
-                (rs,rowNum)->toDataSetDO(rs));
+        String sql=String.format("select * from %s order by name",t_dataset);
+        return jdbcTemplate.query(sql, (rs,rowNum)->toDataSetDO(rs));
     }
 
-    public List<DataSetDO> getDataSetList(long projectId){
-        StringBuilder sb=new StringBuilder();
-        sb.append("select * from "+t_dataset);
-        sb.append(" where id in (select dataset_id from r_project_dataset where project_id=?)");
-        sb.append(" order by layer_group,record_date");
-        return jdbcTemplate.query(
-                sb.toString(),
-                new Object[]{projectId},
-                new int[]{Types.BIGINT},
-                (rs,rowNum)->toDataSetDO(rs));
+    public List<DataSetDO> getDataSetList(String datasetIds){
+        String sql=String.format("select * from %s where id in (%s) order by layer_group,record_date",t_dataset,datasetIds);
+        return jdbcTemplate.query(sql, (rs,rowNum)->toDataSetDO(rs));
     }
 
     public DataSetDO getDataSetById(long id){
-        String sql="select * from "+t_dataset+" where id=?";
-        return DataAccessUtils.requiredSingleResult(
-                jdbcTemplate.query(
-                        sql,
-                        new Object[]{id},
-                        new int[]{Types.BIGINT},
-                        (rs,rowNum)->toDataSetDO(rs))
-        );
+        String sql=String.format("select * from %s where id=?",t_dataset);
+        List<DataSetDO> list=jdbcTemplate.query(
+                sql,
+                new Object[]{id},
+                new int[]{Types.BIGINT},
+                (rs,rowNum)->toDataSetDO(rs));
+        if(list.isEmpty()){
+            return null;
+        }else {
+            return list.get(0);
+        }
     }
 
     private TileMapService toTileMapService(ResultSet rs)throws SQLException{
@@ -210,6 +222,12 @@ public class MetaDao extends CommonDao{
         u.setSource(rs.getString("source"));
         u.setProp(rs.getString("prop"));
         u.setFileExtension(rs.getString("file_extension"));
+        if(isExistColumn(rs,"min_zoom")){
+            u.setMinZoom(rs.getInt("min_zoom"));
+        }
+        if(isExistColumn(rs,"max_zoom")){
+            u.setMaxZoom(rs.getInt("max_zoom"));
+        }
         return u;
     }
 
@@ -230,6 +248,7 @@ public class MetaDao extends CommonDao{
         u.setId(rs.getLong("id"));
         u.setName(rs.getString("name"));
         u.setMemo(rs.getString("memo"));
+        u.setDatasetIds(rs.getString("dataset_ids"));
         u.setCreateTime(rs.getTimestamp("create_time"));
         u.setModifyTime(rs.getTimestamp("modify_time"));
         return u;

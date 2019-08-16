@@ -1,55 +1,48 @@
 package com.guangmushikong.lbi.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Sets;
 import com.guangmushikong.lbi.dao.MetaDao;
 import com.guangmushikong.lbi.dao.TileDao;
-import com.guangmushikong.lbi.model.FeatureCollectionVO;
-import com.guangmushikong.lbi.model.FeatureVO;
-import com.guangmushikong.lbi.model.MapKind;
-import com.guangmushikong.lbi.model.TileMap;
+import com.guangmushikong.lbi.model.*;
 import com.guangmushikong.lbi.util.CommonUtil;
-import com.lbi.model.Tile;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
-@Service("tileService")
+@Service
 public class TileService {
-    @Resource(name="tileDao")
+    @Autowired
     TileDao tileDao;
-    @Resource(name="metaDao")
+    @Autowired
     MetaDao metaDao;
-    @Value("${service.geoserver}")
-    String geoserver;
+
     @Value("${service.tiledata}")
     String tiledata;
 
-    public TileMap getTileMapById(
-            long serviceId,
-            String title,
-            String srs,
-            String extension){
-        return metaDao.getTileMapById(serviceId,title,srs,extension);
-    }
-
-    public TileMap getTileMapById(
-            long serviceId,
-            String title,
-            String extension){
-        return getTileMapById(serviceId,title,"EPSG:900913",extension);
-    }
-
     public byte[] getTile(
-            TileMap tileMap,
-            Tile tile){
-        if(tileMap==null){
-            return null;
+            ServiceType serviceType,
+            String tileset,
+            Tile tile)throws Exception{
+        String[] args=tileset.split("@");
+        String title=args[0];
+        String srs=args[1];
+        String extension=args[2];
+        TileMap tileMap;
+        if(serviceType==ServiceType.TMS){
+            tileMap=metaDao.getTileMapById(ServiceType.TMS.getValue(),title,srs,extension);
+        }else if(serviceType==ServiceType.XYZ){
+            tileMap=metaDao.getTileMapById(ServiceType.XYZ.getValue(),title,srs,extension);
+        }else {
+            throw new Exception("瓦片地图协议:"+serviceType.getValue()+"不符合要求");
         }
+
         MapKind mapKind=MapKind.getByValue(tileMap.getKind());
         if(mapKind==MapKind.LocalCache){
             return getCacheTile(tileMap,tile);
@@ -70,10 +63,15 @@ public class TileService {
             String srs,
             String extension)throws IOException {
         String path=tiledata+File.separator+layerName+File.separator+"layer.json";
-        //System.out.println("【path】"+sb.toString());
         return CommonUtil.fileToByteArray(path);
     }
 
+    /**
+     * 获取本地缓存Tile图像
+     * @param tileMap 瓦片地图对象
+     * @param tile 瓦片对象
+     * @return 图像字节流
+     */
     private byte[] getCacheTile(TileMap tileMap, Tile tile){
         try{
             StringBuilder sb=new StringBuilder();
@@ -84,10 +82,9 @@ public class TileService {
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
             String path=sb.toString();
-            //System.out.println(tile.getX()+","+tile.getY()+","+tile.getZ()+"|"+path);
-            if(tileMap.getExtension().equalsIgnoreCase("tif")
-                    || tileMap.getExtension().equalsIgnoreCase("geojson")
-                    || tileMap.getExtension().equalsIgnoreCase("terrain")){
+
+            Set<String> extensionSet= Sets.newHashSet("tif","geojson","terrain");
+            if(extensionSet.contains(tileMap.getExtension().toLowerCase())){
                 return CommonUtil.fileToByteArray(path);
             }else {
                 return CommonUtil.imageToByteArray(path);
@@ -98,6 +95,12 @@ public class TileService {
         return null;
     }
 
+    /**
+     * 获取本地缓存时序Tile图像
+     * @param tileMap 瓦片地图对象
+     * @param tile 瓦片对象
+     * @return 图像字节流
+     */
     private byte[] getCacheTimeTile(TileMap tileMap, Tile tile){
         try{
             StringBuilder sb=new StringBuilder();
@@ -111,8 +114,8 @@ public class TileService {
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
             String path=sb.toString();
-            //System.out.println(tile.getX()+","+tile.getY()+","+tile.getZ()+"|"+path);
-            if(tileMap.getExtension().equalsIgnoreCase("tif")){
+
+            if("tif".equalsIgnoreCase(tileMap.getExtension())){
                 return CommonUtil.fileToByteArray(path);
             }else{
                 return CommonUtil.imageToByteArray(path);
@@ -123,8 +126,13 @@ public class TileService {
         return null;
     }
 
+    /**
+     * 获取PG图层Tile图像
+     * @param tileMap 瓦片地图对象
+     * @param tile 瓦片对象
+     * @return geojson字节流
+     */
     private byte[] getPGLayerTile(TileMap tileMap, Tile tile){
-        //String[] fields={"id"};
         String prop=tileMap.getProp();
         List<FeatureVO> featureList;
         if(StringUtils.isNotEmpty(prop)){
@@ -137,6 +145,12 @@ public class TileService {
         return JSON.toJSONBytes(result);
     }
 
+    /**
+     * 获取本地缓存XYZ型Tile图像
+     * @param tileMap 瓦片地图对象
+     * @param tile 瓦片对象
+     * @return 图像字节流
+     */
     private byte[] getXYZTile(TileMap tileMap, Tile tile){
         try{
             int alterY=new Double(Math.pow(2,tile.getZ())-1-tile.getY()).intValue();
@@ -149,10 +163,9 @@ public class TileService {
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
             String path=sb.toString();
-            //System.out.println(tile.getX()+","+tile.getY()+","+tile.getZ()+"|"+path);
-            if(tileMap.getExtension().equalsIgnoreCase("tif")
-                    || tileMap.getExtension().equalsIgnoreCase("geojson")
-                    || tileMap.getExtension().equalsIgnoreCase("terrain")){
+
+            Set<String> extensionSet= Sets.newHashSet("tif","geojson","terrain");
+            if(extensionSet.contains(tileMap.getExtension().toLowerCase())){
                 return CommonUtil.fileToByteArray(path);
             }else {
                 return CommonUtil.imageToByteArray(path);

@@ -1,7 +1,5 @@
 package com.guangmushikong.lbi.util;
 
-import com.lbi.util.ImageUtil;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;

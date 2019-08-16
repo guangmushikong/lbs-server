@@ -7,7 +7,6 @@ import lombok.Setter;
  * Class Name: SysRole
  * Description:〈系统角色〉
  * @author deyi
- * @create 2019/6/11
  * @since 1.0.0
  ************************************/
 @Getter

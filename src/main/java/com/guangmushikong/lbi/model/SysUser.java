@@ -1,7 +1,6 @@
 package com.guangmushikong.lbi.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,17 +13,38 @@ import java.util.List;
  * Class Name: SysUser
  * Description:〈系统用户〉
  * @author deyi
- * @create 2019/6/11
  * @since 1.0.0
  ************************************/
-@Getter
-@Setter
+@Data
 public class SysUser implements UserDetails {
+    /**
+     * 主键
+     */
     Long id;
+    /**
+     * 用户名
+     */
     String username;
+    /**
+     * 密码
+     */
     String password;
+    /**
+     * 邮件
+     */
     String email;
+    /**
+     * 角色列表
+     */
     List<SysRole> roles;
+    /**
+     * 项目ID
+     */
+    String projectIds;
+    /**
+     * 所属项目列表
+     */
+    List<ProjectDO> projects;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

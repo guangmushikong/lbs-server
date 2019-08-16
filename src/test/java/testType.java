@@ -1,5 +1,6 @@
 import com.guangmushikong.lbi.model.ServiceType;
-import com.lbi.model.Tile;
+
+import com.guangmushikong.lbi.model.Tile;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,6 +24,7 @@ public class testType {
     @Test
     public void testMD5()throws Exception{
         String pwd="admin123";
+        //pwd="123456";
         MessageDigestPasswordEncoder passEncoder = new MessageDigestPasswordEncoder("MD5");
         String encode=passEncoder.encode(pwd).trim();
         System.out.println("【MessageDigestPasswordEncoder】"+encode);

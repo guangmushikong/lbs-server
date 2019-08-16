@@ -1,20 +1,19 @@
 package com.guangmushikong.lbi.controller;
 
 import com.guangmushikong.lbi.model.ServiceType;
-import com.guangmushikong.lbi.model.TileMap;
+import com.guangmushikong.lbi.model.Tile;
 import com.guangmushikong.lbi.service.TileService;
-import com.lbi.model.Tile;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 
 @Api(value = "TMS地图服务", tags = "TMS", description = "TMS协议瓦片地图服务相关接口")
@@ -22,7 +21,7 @@ import java.io.IOException;
 @RequestMapping("/tms")
 @Slf4j
 public class TMSController {
-    @Resource(name="tileService")
+    @Autowired
     TileService tileService;
 
     @ApiOperation(value = "TMS瓦片地图服务", notes = "获取TMS瓦片")
@@ -34,7 +33,7 @@ public class TMSController {
             @ApiImplicitParam(name = "y", value = "瓦片Y值", required = true, dataType = "long"),
             @ApiImplicitParam(name = "extension", value = "后缀", required = true, dataType = "string"),
     })
-    @RequestMapping(value="/{version}/{tileset}/{z}/{x}/{y}.{extension}",method = RequestMethod.GET)
+    @GetMapping("/{version}/{tileset}/{z}/{x}/{y}.{extension}")
     public ResponseEntity getTile(
             @PathVariable("version") String version,
             @PathVariable("tileset") String tileset,
@@ -44,9 +43,7 @@ public class TMSController {
             @PathVariable("extension") String extension) {
         try{
             Tile tile=new Tile(x,y,z);
-            String[] args=tileset.split("@");
-            TileMap tileMap=tileService.getTileMapById(ServiceType.TMS.getValue(),args[0],args[1],args[2]);
-            byte[] bytes=tileService.getTile(tileMap,tile);
+            byte[] bytes=tileService.getTile(ServiceType.TMS,tileset,tile);
             ResponseEntity.BodyBuilder bodyBuilder=ResponseEntity.ok();
             if("json".equalsIgnoreCase(extension)){
                 bodyBuilder.contentType(MediaType.APPLICATION_JSON);

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Types;
 
-@Repository(value="logDao")
+@Repository
 public class LogDao extends CommonDao{
     @Value("${spring.table.t_log}")
     String t_log;
