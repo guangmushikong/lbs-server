@@ -6,6 +6,7 @@ import com.guangmushikong.lbi.dao.MetaDao;
 import com.guangmushikong.lbi.dao.TileDao;
 import com.guangmushikong.lbi.model.*;
 import com.guangmushikong.lbi.util.CommonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class TileService {
     @Autowired
     TileDao tileDao;
@@ -82,6 +84,7 @@ public class TileService {
             sb.append(File.separator).append(tile.getY());
             sb.append(".").append(tileMap.getFileExtension());
             String path=sb.toString();
+            //log.info("【paht】"+path);
 
             Set<String> extensionSet= Sets.newHashSet("tif","geojson","terrain");
             if(extensionSet.contains(tileMap.getExtension().toLowerCase())){

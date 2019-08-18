@@ -56,7 +56,7 @@ public class MetaDao extends CommonDao{
         sb.append(" (select map_id,min(sort_order) as min_zoom,max(sort_order) as max_zoom from "+t_tileset+" group by map_id) t2");
         sb.append(" on t1.id=t2.map_id");
         sb.append(" where t1.service_id=?");
-        sb.append(" order by t1.title,t1.layer_group");
+        sb.append(" order by t1.name,t1.layer_group");
         //log.info("【sql】{}",sb.toString());
         return jdbcTemplate.query(
                 sb.toString(),
@@ -72,7 +72,7 @@ public class MetaDao extends CommonDao{
         sb.append(" (select map_id,min(sort_order) as min_zoom,max(sort_order) as max_zoom from "+t_tileset+" group by map_id) t2");
         sb.append(" on t1.id=t2.map_id");
         sb.append(" where t1.id in ("+ StringUtils.join(ids,",")+")");
-        sb.append(" order by t1.title,t1.layer_group");
+        sb.append(" order by t1.name,t1.layer_group");
         //log.info("【sql】{}",sb.toString());
         return jdbcTemplate.query(
                 sb.toString(),
@@ -99,19 +99,20 @@ public class MetaDao extends CommonDao{
             String title,
             String srs,
             String extension){
-        String sql="select * from "+t_tilemap+" where service_id=? and title=? and srs=? and extension=?";
+        long epsg=Long.parseLong(srs.replace("EPSG:",""));
+        String sql="select * from "+t_tilemap+" where service_id=? and name=? and epsg=? and tile_type=?";
         List<TileMap> list=jdbcTemplate.query(
                 sql,
                 new Object[]{
                         serviceId,
                         title,
-                        srs,
+                        epsg,
                         extension
                 },
                 new int[]{
                         Types.BIGINT,
                         Types.VARCHAR,
-                        Types.VARCHAR,
+                        Types.BIGINT,
                         Types.VARCHAR,
                 },
                 (rs,rowNum)->toTileMap(rs));
@@ -195,16 +196,29 @@ public class MetaDao extends CommonDao{
     private TileMap toTileMap(ResultSet rs)throws SQLException{
         TileMap u=new TileMap();
         u.setId(rs.getLong("id"));
-        u.setServiceId(rs.getLong("service_id"));
-        u.setTitle(rs.getString("title"));
-        u.setRecordDate(rs.getString("record_date"));
-        u.setAbstract(rs.getString("abstract"));
-        u.setSrs(rs.getString("srs"));
-        u.setProfile(rs.getString("profile"));
-        String href=rs.getString("href");
-        href=href.replace("${mapserver}",mapserver);
-        u.setHref(href);
 
+        u.setServiceId(rs.getLong("service_id"));
+        u.setTitle(rs.getString("name"));
+        u.setAbstract(rs.getString("memo"));
+        u.setKind(rs.getInt("kind"));
+        u.setGroup(rs.getString("layer_group"));
+
+        long epsg=rs.getLong("epsg");
+        String tileType=rs.getString("tile_type");
+        u.setSrs(String.format("EPSG:%d",epsg));
+        if(900913==epsg){
+            u.setProfile("mercator");
+        }else if(4326==epsg){
+            u.setProfile("geodetic");
+        }
+        String href;
+        if(u.getServiceId()==1){
+            href=String.format("http://%s/xyz/1.0.0/%s@EPSG:%d@%s",mapserver,u.getTitle(),epsg,tileType);
+        }else {
+            href=String.format("http://%s/tms/1.0.0/%s@EPSG:%d@%s",mapserver,u.getTitle(),epsg,tileType);
+        }
+
+        u.setHref(href);
         u.setMinX(rs.getDouble("minx"));
         u.setMinY(rs.getDouble("miny"));
         u.setMaxX(rs.getDouble("maxx"));
@@ -214,14 +228,24 @@ public class MetaDao extends CommonDao{
 
         u.setWidth(rs.getInt("width"));
         u.setHeight(rs.getInt("height"));
-        u.setMimeType(rs.getString("mime_type"));
-        u.setExtension(rs.getString("extension"));
 
-        u.setKind(rs.getInt("kind"));
-        u.setGroup(rs.getString("layer_group"));
-        u.setSource(rs.getString("source"));
+        u.setExtension(tileType);
+        u.setFileExtension(rs.getString("suffix"));
+        if("jpeg".equals(tileType)){
+            u.setMimeType("image/jpeg");
+        }else if("png".equals(tileType)){
+            u.setMimeType("image/png");
+        }else if("tif".equals(tileType)){
+            u.setMimeType("image/tif");
+        }else if("geojson".equals(tileType)){
+            u.setMimeType("application/json");
+        }else if("terrain".equals(tileType)){
+            u.setMimeType("application/terrain");
+        }
+
+        u.setRecordDate(rs.getString("record_date"));
         u.setProp(rs.getString("prop"));
-        u.setFileExtension(rs.getString("file_extension"));
+
         if(isExistColumn(rs,"min_zoom")){
             u.setMinZoom(rs.getInt("min_zoom"));
         }

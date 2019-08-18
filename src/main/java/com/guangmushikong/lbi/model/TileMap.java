@@ -2,11 +2,9 @@ package com.guangmushikong.lbi.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class TileMap {
     long id;
     /**
@@ -28,8 +26,21 @@ public class TileMap {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String _abstract;
 
+    /**
+     * 类别
+     */
+    @JSONField(serialize=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    int kind;
+    /**
+     * 图层分组
+     */
+    String group;
+
     String srs;
+
     String profile;
+
     String href;
     /**
      * 最小经度
@@ -80,16 +91,7 @@ public class TileMap {
      */
     String extension;
 
-    /**
-     * 类别
-     */
-    @JSONField(serialize=false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    int kind;
-    /**
-     * 图层组
-     */
-    String group;
+
     /**
      * 数据源
      */
@@ -106,6 +108,8 @@ public class TileMap {
     /**
      * 文件扩展名
      */
+    @JSONField(serialize=false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String fileExtension;
 
     public void setAbstract(String val){
