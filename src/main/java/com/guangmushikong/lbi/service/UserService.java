@@ -31,4 +31,8 @@ public class UserService implements UserDetailsService {
         }
         return user;
     }
+
+    public SysUser findByUsername(String username){
+        return userDao.findByUsername(username);
+    }
 }
