@@ -70,7 +70,8 @@ insert into ops.t_application_properties(profile,key, value, comment, applicatio
 insert into ops.t_application_properties(profile,key, value, comment, application) values('prod','spring.img.path','/home/dev/data/img','上传图片文件夹','lbs-server');
 insert into ops.t_application_properties(profile,key, value, comment, application) values('dev','spring.img.path','F:/data/img','上传图片文件夹','lbs-server');
 
-
+insert into ops.t_application_properties(profile,key, value, comment, application) values('prod','spring.table.t_custom_data','t_custom_data','用户数据表','lbs-server');
+insert into ops.t_application_properties(profile,key, value, comment, application) values('dev','spring.table.t_custom_data','t_custom_data','用户数据表','lbs-server');
 
 
 

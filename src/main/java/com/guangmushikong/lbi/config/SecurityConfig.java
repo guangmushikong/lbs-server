@@ -35,8 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             @Override
             public boolean matches(CharSequence charSequence, String s) {
                 String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
-                boolean res = s.equals(encode);
-                return res;
+                return s.equals(encode);
             }
         } );
 
@@ -52,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //OPTIONS请求全部放行
                 .antMatchers( HttpMethod.OPTIONS, "/**").permitAll()
                 //登录接口放行
-                .antMatchers("/auth/login","/tms/**","/xyz/**","/dem/**").permitAll()
+                .antMatchers("/auth/login","/tms/**","/xyz/**","/dem/**","/image/**").permitAll()
                 //其他接口全部接受验证
                 .anyRequest().authenticated();
 

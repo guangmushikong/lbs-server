@@ -1,8 +1,8 @@
 
 package com.guangmushikong.lbi.service;
 
-import com.guangmushikong.lbi.dao.CustomDataSetDao;
-import com.guangmushikong.lbi.model.CustomVO;
+import com.guangmushikong.lbi.dao.UserDataDao;
+import com.guangmushikong.lbi.model.UserDataDO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,22 +21,35 @@ import java.util.List;
  ************************************/
 @Service
 @Slf4j
-public class CustomDataSetService {
+public class UserDataService {
     @Autowired
-    CustomDataSetDao customDataSetDao;
+    UserDataDao userDataDao;
 
     @Value("${spring.img.path}")
     String imgPath;
 
-    public List<CustomVO> listCustomDataSet(long projectId){
-        return customDataSetDao.listCustomDataSet(projectId);
+    public List<UserDataDO> listUserData(long projectId){
+        return userDataDao.listUserData(projectId);
     }
-    public void addCustomDataSet(CustomVO customVO){
-        customDataSetDao.addCustomData(customVO);
+    public void addUserData(UserDataDO customVO){
+        userDataDao.addUserData(customVO);
     }
 
-    public void updateCustomDataSet(CustomVO customVO){
-        customDataSetDao.updateCustomData(customVO);
+    public void saveUserData(UserDataDO customVO){
+        UserDataDO customVO2=userDataDao.getUserData(customVO.getUuid());
+        if(customVO2!=null){
+            userDataDao.updateUserData(customVO);
+        }else {
+            userDataDao.addUserData(customVO);
+        }
+    }
+
+    public void updateUserData(UserDataDO customVO){
+        userDataDao.updateUserData(customVO);
+    }
+
+    public void delUserData(String uuid,long projectId){
+        userDataDao.delUserData(uuid,projectId);
     }
 
     public String saveJpg(long projectId,String fileName,byte[] bytes)throws IOException {

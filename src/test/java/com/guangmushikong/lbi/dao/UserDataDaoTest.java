@@ -16,12 +16,12 @@ import org.junit.Test;
 import java.sql.*;
 import java.sql.PreparedStatement;
 /*************************************
- * Class Name: CustomDataSetDaoTest
- * Description:〈CustomDataSetDaoTest〉
+ * Class Name: UserDataDaoTest
+ * Description:〈UserDataDaoTest〉
  * @author liumingkai
  * @since 1.0.0
  ************************************/
-public class CustomDataSetDaoTest {
+public class UserDataDaoTest {
     Connection conn;
     @Before
     public void init(){

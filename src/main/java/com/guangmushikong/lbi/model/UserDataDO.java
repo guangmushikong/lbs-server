@@ -4,14 +4,13 @@ package com.guangmushikong.lbi.model;
 import lombok.Data;
 
 /*************************************
- * Class Name: CustomVO
+ * Class Name: UserDataDO
  * Description:〈自定义数据VO〉
  * @author deyi
  * @since 1.0.0
  ************************************/
 @Data
-public class CustomVO {
-
+public class UserDataDO {
     /**
      * 数据ID
      */
@@ -20,6 +19,10 @@ public class CustomVO {
      * 数据集名称
      */
     String name;
+    /**
+     * 类型。0绘制数据，1轨迹数据
+     */
+    int type;
     /**
      * 项目ID
      */

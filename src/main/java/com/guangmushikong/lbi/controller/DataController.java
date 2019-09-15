@@ -2,16 +2,14 @@
 package com.guangmushikong.lbi.controller;
 
 import com.guangmushikong.lbi.config.JwtTokenFilter;
-import com.guangmushikong.lbi.model.CustomVO;
+import com.guangmushikong.lbi.model.UserDataDO;
 import com.guangmushikong.lbi.model.ResultBody;
-import com.guangmushikong.lbi.service.CustomDataSetService;
+import com.guangmushikong.lbi.service.UserDataService;
 import com.guangmushikong.lbi.service.UserService;
 import com.guangmushikong.lbi.util.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,40 +30,24 @@ public class DataController {
     @Autowired
     UserService userService;
     @Autowired
-    CustomDataSetService customDataSetService;
+    UserDataService userDataService;
 
     @GetMapping(value="/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResultBody listProject(@RequestParam("projectId") long projectId) {
-        List<CustomVO> list=customDataSetService.listCustomDataSet(projectId);
+        List<UserDataDO> list=userDataService.listUserData(projectId);
         return new ResultBody<>(list);
     }
 
-    @PostMapping(value="/add", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResultBody addCustomData(
-            @RequestBody CustomVO custom,
+    @PostMapping(value="/batchSave", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResultBody batchSaveUserData(
+            @RequestBody List<UserDataDO> customs,
             HttpServletRequest request) {
         try{
             String token=request.getHeader(JwtTokenFilter.HEADER_STRING);
             String username = JwtTokenUtil.getUsernameFromToken(token);
-            custom.setUserName(username);
-            customDataSetService.addCustomDataSet(custom);
-            return new ResultBody<>(0,"OK");
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ResultBody<>(-1,e.getMessage());
-        }
-    }
-
-    @PostMapping(value="/batchAdd", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResultBody batchAddCustomData(
-            @RequestBody List<CustomVO> customs,
-            HttpServletRequest request) {
-        try{
-            String token=request.getHeader(JwtTokenFilter.HEADER_STRING);
-            String username = JwtTokenUtil.getUsernameFromToken(token);
-            for(CustomVO custom: customs){
+            for(UserDataDO custom: customs){
                 custom.setUserName(username);
-                customDataSetService.addCustomDataSet(custom);
+                userDataService.saveUserData(custom);
             }
             return new ResultBody<>(0,"OK");
         }catch (Exception e){
@@ -74,20 +56,28 @@ public class DataController {
         }
     }
 
-    @PostMapping(value="/update", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResultBody updateCustomData(
-            @RequestBody CustomVO custom,
+    @PostMapping(value="/save", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResultBody saveUserData(
+            @RequestBody UserDataDO custom,
             HttpServletRequest request) {
         try{
             String token=request.getHeader(JwtTokenFilter.HEADER_STRING);
             String username = JwtTokenUtil.getUsernameFromToken(token);
             custom.setUserName(username);
-            customDataSetService.updateCustomDataSet(custom);
+            userDataService.saveUserData(custom);
             return new ResultBody<>(0,"OK");
         }catch (Exception e){
             e.printStackTrace();
             return new ResultBody<>(-1,e.getMessage());
         }
+    }
+
+    @DeleteMapping(value="/del", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResultBody delCustomData(
+            @RequestParam("uuid") String uuid,
+            @RequestParam("projectId") long projectId){
+        userDataService.delUserData(uuid,projectId);
+        return new ResultBody<>(0,"OK");
     }
 
     @PostMapping(value="/imgUpload")
@@ -99,8 +89,9 @@ public class DataController {
                 //获取上传原图片名称
                 String fileName = file.getOriginalFilename();
                 log.info("【imgUpload】pid:{},fileName:{}",projectId,fileName);
-                String savePath=customDataSetService.saveJpg(projectId,fileName,file.getBytes());
-                return new ResultBody<>(0,"OK",savePath);
+                String savePath=userDataService.saveJpg(projectId,fileName,file.getBytes());
+                String fileUrl=String.format("http://111.202.109.211:8080/image/project/%d/img/%s",projectId,fileName);
+                return new ResultBody<>(0,"OK",fileUrl);
             }else {
                 return new ResultBody<>(-1,"没有上传文件");
             }
@@ -108,34 +99,5 @@ public class DataController {
             e.printStackTrace();
             return new ResultBody<>(-1,e.getMessage());
         }
-    }
-
-    @GetMapping(value="/imgGet")
-    public ResponseEntity imgGet(
-            @RequestParam("projectId") long projectId,
-            @RequestParam("fileName") String fileName){
-        log.info("【imgGet】pid:{},fileName:{}",projectId,fileName);
-        try{
-            String suffix=getFileSuffix(fileName);
-            ResponseEntity.BodyBuilder bodyBuilder=ResponseEntity.ok();
-            byte[] bytes=customDataSetService.getFile(projectId,fileName);
-            if("jpg".equalsIgnoreCase(suffix)){
-                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
-            }else if("jpeg".equalsIgnoreCase(suffix)){
-                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
-            }else if("png".equalsIgnoreCase(suffix)){
-                bodyBuilder.contentType(MediaType.IMAGE_PNG);
-            }else{
-                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
-            }
-            return bodyBuilder.body(bytes);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-    }
-
-    private String getFileSuffix(String name) {
-        return name.substring(name.lastIndexOf(".")+1, name.length());
     }
 }

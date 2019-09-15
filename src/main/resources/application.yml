@@ -21,5 +21,3 @@ spring:
       connection-timeout: 30000
       connection-test-query: SELECT 1
       validation-timeout: 5000
-  table:
-    t_custom_data: t_custom_data
