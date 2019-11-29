@@ -100,4 +100,15 @@ public class DataController {
             return new ResultBody<>(-1,e.getMessage());
         }
     }
+
+    @GetMapping("/syncShp")
+    public ResultBody syncShp(@RequestParam("layerName") String layerName) {
+        try{
+            userDataService.shp2PgTable(layerName);
+            return new ResultBody<>(0,"OK");
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResultBody<>(-1,e.getMessage());
+        }
+    }
 }

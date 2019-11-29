@@ -56,4 +56,8 @@ public class CommonDao {
         }
         return false;
     }
+
+    public void executeSql(String sql){
+        jdbcTemplate.execute(sql);
+    }
 }

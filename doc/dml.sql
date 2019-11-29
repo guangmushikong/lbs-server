@@ -74,7 +74,8 @@ insert into ops.t_application_properties(profile,key, value, comment, applicatio
 insert into ops.t_application_properties(profile,key, value, comment, application) values('dev','spring.table.t_custom_data','t_custom_data','用户数据表','lbs-server');
 
 
-
+insert into ops.t_application_properties(profile,key, value, comment, application) values('prod','service.tiledata','/home/dev/data/tile','瓦片数据路径','lbi-web');
+insert into ops.t_application_properties(profile,key, value, comment, application) values('dev','service.tiledata','F:/data/tile','瓦片数据路径','lbi-web');
 
 
 

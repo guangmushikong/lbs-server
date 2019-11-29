@@ -15,7 +15,6 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-
     /**
      * 登录
      */

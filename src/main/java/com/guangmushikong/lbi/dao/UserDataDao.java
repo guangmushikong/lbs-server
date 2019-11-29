@@ -102,6 +102,10 @@ public class UserDataDao extends CommonDao{
                 });
     }
 
+    public void saveRow(String sql,Object[] objects,int[] types){
+        jdbcTemplate.update(sql,objects,types);
+    }
+
     private UserDataDO toUserDataDO(ResultSet rs)throws SQLException {
         UserDataDO u=new UserDataDO();
 

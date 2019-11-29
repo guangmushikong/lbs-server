@@ -32,7 +32,7 @@ public class TileDao extends CommonDao{
         String enveSql=String.format("ST_MakeEnvelope(%f,%f,%f,%f,4326)",enve.getMinX(),enve.getMinY(),enve.getMaxX(),enve.getMaxY());
         field+=",ST_AsGeoJSON(st_clipbybox2d(geom,"+enveSql+")) as geojson";
         String sql=String.format("select %s from data.%s where st_intersects(st_geomfromtext('%s',4326),ST_Transform(geom,4326))",field,tableName,grid.toText());
-        log.info("【sql】{}",sql);
+        //log.info("【sql】{}",sql);
         return jdbcTemplate.query(
                 sql,
                 (rs,rowNum)->{
