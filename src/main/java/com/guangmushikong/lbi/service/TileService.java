@@ -1,6 +1,7 @@
 package com.guangmushikong.lbi.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Sets;
 import com.guangmushikong.lbi.dao.MetaDao;
 import com.guangmushikong.lbi.dao.TileDao;
@@ -51,9 +52,9 @@ public class TileService {
         }else if(mapKind==MapKind.LocalTimeCache){
             return getCacheTimeTile(tileMap,tile);
         }else if(mapKind==MapKind.PGLayer){
-            return getPGLayerTile(tileMap,tile);
+            return getPgLayerTile(tileMap,tile);
         }else if(mapKind==MapKind.XYZLayer){
-            return getXYZTile(tileMap,tile);
+            return getXyzTile(tileMap,tile);
         }else {
             return null;
         }
@@ -135,7 +136,7 @@ public class TileService {
      * @param tile 瓦片对象
      * @return geojson字节流
      */
-    private byte[] getPGLayerTile(TileMap tileMap, Tile tile){
+    private byte[] getPgLayerTile(TileMap tileMap, Tile tile){
         String prop=tileMap.getProp();
         List<FeatureVO> featureList;
         if(StringUtils.isNotEmpty(prop)){
@@ -145,7 +146,7 @@ public class TileService {
         }
         FeatureCollectionVO result=new FeatureCollectionVO();
         result.setFeatures(featureList);
-        return JSON.toJSONBytes(result);
+        return JSON.toJSONBytes(result, SerializerFeature.DisableCircularReferenceDetect);
     }
 
     /**
@@ -154,7 +155,7 @@ public class TileService {
      * @param tile 瓦片对象
      * @return 图像字节流
      */
-    private byte[] getXYZTile(TileMap tileMap, Tile tile){
+    private byte[] getXyzTile(TileMap tileMap, Tile tile){
         try{
             int alterY=new Double(Math.pow(2,tile.getZ())-1-tile.getY()).intValue();
             tile.setY(alterY);
