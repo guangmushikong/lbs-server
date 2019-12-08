@@ -48,11 +48,12 @@ public class testShp {
     public void 读取shp(){
         String tableName="test";
         String filePath="E:/data/liupanshui_point/点位.shp";
-        //readShp(tableName,filePath);
-        int[] types=IntStream.range(0, 4).map(u-> Types.VARCHAR).toArray();
+        filePath="E:/data/1：100万矢量图/LRRL.shp";
+        readShp(tableName,filePath);
+        /*int[] types=IntStream.range(0, 4).map(u-> Types.VARCHAR).toArray();
         for(int t:types){
             System.out.println(t);
-        }
+        }*/
     }
 
     private void readShp(String tableName,String filePath){
@@ -80,19 +81,19 @@ public class testShp {
             log.info("【total】"+result.size());
             FeatureIterator<SimpleFeature> itertor = result.features();
 
-            while(itertor.hasNext()){
+            /*while(itertor.hasNext()){
                 SimpleFeature feature = itertor.next();
                 String iSql=getInsertSql(tableName,feature,fieldNames);
                 log.info("【sql】"+iSql);
-                /*Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                *//*Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 String wkt=geometry.toText();
                 JSONObject item=new JSONObject();
                 for(int k=0;k<fieldNames.size();k++){
                     Name fieldName=fieldNames.get(k);
                     item.put(fieldName.toString(),feature.getAttribute(fieldName).toString());
                 }
-                log.info("【row】"+item.toJSONString());*/
-            }
+                log.info("【row】"+item.toJSONString());*//*
+            }*/
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -104,6 +105,7 @@ public class testShp {
         sb.append("(id bigserial primary key,");
         GeometryType geometryType=type.getGeometryDescriptor().getType();
         log.info("【geometryType】"+geometryType.getName());
+        if(geometryType.equals("MultiLineString"))
         for(int i=0;i<type.getAttributeCount();i++){
             AttributeType attributeType=type.getType(i);
             if(geometryType.getName()!=attributeType.getName()){
