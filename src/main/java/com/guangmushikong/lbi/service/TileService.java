@@ -69,6 +69,15 @@ public class TileService {
         return CommonUtil.fileToByteArray(path);
     }
 
+    public byte[] getMeta(
+            String version,
+            String layerName,
+            String srs,
+            String extension)throws IOException {
+        String path=tiledata+File.separator+layerName+File.separator+"meta.json";
+        return CommonUtil.fileToByteArray(path);
+    }
+
     /**
      * 获取本地缓存Tile图像
      * @param tileMap 瓦片地图对象

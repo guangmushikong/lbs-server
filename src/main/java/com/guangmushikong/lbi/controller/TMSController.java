@@ -71,4 +71,12 @@ public class TMSController {
         String[] args=tileset.split("@");
         return tileService.getLayer(version,args[0],args[1],args[2]);
     }
+
+    @GetMapping(value = "/{version}/{tileset}/meta.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public byte[] getMeta(
+            @PathVariable("version") String version,
+            @PathVariable("tileset") String tileset)throws IOException {
+        String[] args=tileset.split("@");
+        return tileService.getMeta(version,args[0],args[1],args[2]);
+    }
 }

@@ -100,7 +100,8 @@ public class MetaDao extends CommonDao{
             String srs,
             String extension){
         long epsg=Long.parseLong(srs.replace("EPSG:",""));
-        String sql="select * from "+t_tilemap+" where service_id=? and name=? and epsg=? and tile_type=?";
+        String sql=String.format("select * from %s where service_id=? and name=? and epsg=? and tile_type=?",t_tilemap);
+        //log.info("sql:{},serviceId:{},title:{},epsg:{},extension:{}",sql,serviceId,title,epsg,extension);
         List<TileMap> list=jdbcTemplate.query(
                 sql,
                 new Object[]{
