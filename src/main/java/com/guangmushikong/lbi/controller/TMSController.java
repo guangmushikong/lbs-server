@@ -3,10 +3,6 @@ package com.guangmushikong.lbi.controller;
 import com.guangmushikong.lbi.model.ServiceType;
 import com.guangmushikong.lbi.model.Tile;
 import com.guangmushikong.lbi.service.TileService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-@Api(value = "TMS地图服务", tags = "TMS", description = "TMS协议瓦片地图服务相关接口")
+/**
+ * TMS地图服务
+ */
 @RestController
 @RequestMapping("/tms")
 @Slf4j
@@ -24,15 +22,15 @@ public class TMSController {
     @Autowired
     TileService tileService;
 
-    @ApiOperation(value = "TMS瓦片地图服务", notes = "获取TMS瓦片")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "version", value = "版本号", required = true, dataType = "string"),
-            @ApiImplicitParam(name = "tileset", value = "数据集名", required = true, dataType = "string"),
-            @ApiImplicitParam(name = "z", value = "瓦片Z值", required = true, dataType = "int"),
-            @ApiImplicitParam(name = "x", value = "瓦片X值", required = true, dataType = "long"),
-            @ApiImplicitParam(name = "y", value = "瓦片Y值", required = true, dataType = "long"),
-            @ApiImplicitParam(name = "extension", value = "后缀", required = true, dataType = "string"),
-    })
+    /**
+     * 获取TMS瓦片
+     * @param version 版本号
+     * @param tileset 版本号
+     * @param z 瓦片Z值
+     * @param x 瓦片X值
+     * @param y 瓦片Y值
+     * @param extension 后缀
+     */
     @GetMapping("/{version}/{tileset}/{z}/{x}/{y}.{extension}")
     public ResponseEntity getTile(
             @PathVariable("version") String version,

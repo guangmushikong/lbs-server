@@ -29,24 +29,6 @@
     </properties>
 
     <dependencies>
-        <!-- SpringCloud start -->
-        <!-- 注册中心依赖 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
-        <!-- 配置中心依赖 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
-        <!-- 服务发现+负载均衡依赖 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-        <!-- SpringCloud end -->
-
         <!-- SpringBoot start -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -81,19 +63,6 @@
             <scope>test</scope>
         </dependency>
         <!-- SpringBoot end -->
-
-        <!--Swagger start-->
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <!--Swagger end-->
 
         <dependency>
             <groupId>org.postgresql</groupId>

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration debug="true">
-    <!-- 应用名称 -->
-    <springProperty scope="context" name="app_name" source="spring.application.name"/>
     <!-- 日志文件保存路径 -->
     <property name="log_home" value="logs" />
 
@@ -23,7 +21,7 @@
             <level>INFO</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log_home}/${app_name}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${log_home}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>14</maxHistory>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -36,7 +34,7 @@
             <level>ERROR</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log_home}/${app_name}_error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${log_home}/app_error.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>14</maxHistory>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

@@ -1,23 +1,7 @@
-################### 应用配置
-info:
-  version: 0.0.1
-  name: ${spring.application.name}
-  comment: "LBS服务引擎"
 server:
-  compression:
-    enabled: true
-    mime-types: application/json,application/vnd.quantized-mesh
-################### 数据库连接池配置 Postgresql + Hikari
+  port: 8080
 spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 15
-      auto-commit: true
-      idle-timeout: 30000
-      max-lifetime: 1800000
-      connection-timeout: 30000
-      connection-test-query: SELECT 1
-      validation-timeout: 5000
+  application:
+    name: lbs-server
+  profiles:
+    active: dev

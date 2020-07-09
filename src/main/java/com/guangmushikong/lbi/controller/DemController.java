@@ -3,10 +3,7 @@ package com.guangmushikong.lbi.controller;
 import com.guangmushikong.lbi.model.ContourPoint;
 import com.guangmushikong.lbi.model.ResultBody;
 import com.guangmushikong.lbi.service.DemService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,18 +12,20 @@ import static com.guangmushikong.lbi.model.LBSConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Api(value = "Dem数据接口", tags = "Dem", description = "Dem数据相关接口")
+/**
+ * Dem数据接口
+ */
 @RestController
 @RequestMapping("/dem")
 public class DemController {
     @Autowired
     DemService demService;
 
-    @ApiOperation(value = "剖面等高线", notes = "获取等高线列表", produces = "application/json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "layerName", value = "图层", dataType = "string"),
-            @ApiImplicitParam(name = "xys", value = "剖面曲线", required = true, dataType = "string")
-    })
+    /**
+     * 获取等高线列表
+     * @param layerName 图层
+     * @param xys 剖面曲线
+     */
     @GetMapping(value="/contour",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResultBody contour(
             @RequestParam(value = "layerName",defaultValue = "") String layerName,

@@ -1,7 +1,6 @@
 package com.guangmushikong.lbi.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  *
@@ -11,8 +10,7 @@ import lombok.Setter;
  * @version	1.0
  * @author deyi
  */
-@Getter
-@Setter
+@Data
 public class Pixel {
     /**
      * 横向像素
@@ -37,6 +35,7 @@ public class Pixel {
         this.y=y;
     }
 
+    @Override
     public String toString(){
         return "Pixel("+x+","+y+")";
     }

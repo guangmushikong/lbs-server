@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://datalaker-svr01:55432/cateye
+    username: cateye
+    password: '#Cateye@2019$'
+    hikari:
+      auto-commit: true
+      connection-test-query: SELECT 1
+      connection-timeout: 30000
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      minimum-idle: 5
+      maximum-pool-size: 15
+  table:
+    t_sys_user: t_sys_user
+    t_sys_role: t_sys_role
+    t_log: t_log
+    t_custom_data: t_custom_data
+    t_dataset: t_dataset
+    t_project: t_project
+    t_tilemap: t_tilemap
+    t_tilemapservice: t_tilemapservice
+    t_tileset: t_tileset
+  img:
+    path: F:/data/img
+dem:
+  gujiao: e:/data/gujiao.tif
+  jingzhuang: e:/data/jzhdem_7m.tif
+service:
+  mapserver: localhost:8080
+  tiledata: E:/data/tile
