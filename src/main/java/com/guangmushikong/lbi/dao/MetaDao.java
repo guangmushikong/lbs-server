@@ -93,7 +93,7 @@ public class MetaDao extends CommonDao{
         }
     }
 
-    @Cacheable(value = "tileMapCache",key = "'tileMap_'+#serviceId+#title+#srs+#extension")
+    @Cacheable(value = "tileMapCache",key = "'tileMap_'+#serviceId+#title+#srs+#extension", unless="#result == null")
     public TileMap getTileMapById(
             long serviceId,
             String title,
@@ -101,7 +101,6 @@ public class MetaDao extends CommonDao{
             String extension){
         long epsg=Long.parseLong(srs.replace("EPSG:",""));
         String sql=String.format("select * from %s where service_id=? and name=? and epsg=? and tile_type=?",t_tilemap);
-        //log.info("sql:{},serviceId:{},title:{},epsg:{},extension:{}",sql,serviceId,title,epsg,extension);
         List<TileMap> list=jdbcTemplate.query(
                 sql,
                 new Object[]{
@@ -200,7 +199,7 @@ public class MetaDao extends CommonDao{
 
         u.setServiceId(rs.getLong("service_id"));
         u.setTitle(rs.getString("name"));
-        u.setAbstract(rs.getString("memo"));
+        u.set_abstract(rs.getString("memo"));
         u.setKind(rs.getInt("kind"));
         u.setGroup(rs.getString("layer_group"));
 

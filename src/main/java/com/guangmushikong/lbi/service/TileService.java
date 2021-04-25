@@ -1,20 +1,25 @@
 package com.guangmushikong.lbi.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.google.common.collect.Sets;
 import com.guangmushikong.lbi.dao.MetaDao;
+import com.guangmushikong.lbi.dao.RestTileDao;
 import com.guangmushikong.lbi.dao.TileDao;
 import com.guangmushikong.lbi.model.*;
+import com.guangmushikong.lbi.model.enums.MapKind;
+import com.guangmushikong.lbi.model.enums.ServiceType;
+import com.guangmushikong.lbi.model.geojson.FeatureCollectionVO;
+import com.guangmushikong.lbi.model.geojson.FeatureVO;
 import com.guangmushikong.lbi.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
+
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +30,8 @@ public class TileService {
     TileDao tileDao;
     @Autowired
     MetaDao metaDao;
+    @Autowired
+    RestTileDao restTileDao;
 
     @Value("${service.tiledata}")
     String tiledata;
@@ -38,6 +45,7 @@ public class TileService {
         String srs=args[1];
         String extension=args[2];
         TileMap tileMap;
+        //服务协议类型
         if(serviceType==ServiceType.TMS){
             tileMap=metaDao.getTileMapById(ServiceType.TMS.getValue(),title,srs,extension);
         }else if(serviceType==ServiceType.XYZ){
@@ -45,7 +53,10 @@ public class TileService {
         }else {
             throw new Exception("瓦片地图协议:"+serviceType.getValue()+"不符合要求");
         }
-
+        if(tileMap==null){
+            throw new Exception("该瓦片地图不存在:"+tileset);
+        }
+        //fixme 瓦片地图类型
         MapKind mapKind=MapKind.getByValue(tileMap.getKind());
         if(mapKind==MapKind.LocalCache){
             return getCacheTile(tileMap,tile);
@@ -55,6 +66,10 @@ public class TileService {
             return getPgLayerTile(tileMap,tile);
         }else if(mapKind==MapKind.XYZLayer){
             return getXyzTile(tileMap,tile);
+        }else if(mapKind==MapKind.ExtXyzLayer){
+            return getExtXyzTile(tileMap,tile);
+        }else if(mapKind==MapKind.ExtTmsLayer){
+            return getExtTmsTile(tileMap,tile);
         }else {
             return null;
         }
@@ -86,22 +101,13 @@ public class TileService {
      */
     private byte[] getCacheTile(TileMap tileMap, Tile tile){
         try{
-            StringBuilder sb=new StringBuilder();
-            sb.append(tiledata);
-            sb.append(File.separator).append(tileMap.getTitle());
-            sb.append(File.separator).append(tile.getZ());
-            sb.append(File.separator).append(tile.getX());
-            sb.append(File.separator).append(tile.getY());
-            sb.append(".").append(tileMap.getFileExtension());
-            String path=sb.toString();
-            //log.info("【paht】"+path);
-
-            Set<String> extensionSet= Sets.newHashSet("tif","geojson","terrain");
-            if(extensionSet.contains(tileMap.getExtension().toLowerCase())){
-                return CommonUtil.fileToByteArray(path);
-            }else {
-                return CommonUtil.imageToByteArray(path);
-            }
+            return restTileDao.getLocalTmsTile(
+                    tileMap.getTitle(),
+                    null,
+                    tileMap.getFileExtension(),
+                    tile.getX(),
+                    tile.getY(),
+                    tile.getZ());
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -116,23 +122,16 @@ public class TileService {
      */
     private byte[] getCacheTimeTile(TileMap tileMap, Tile tile){
         try{
-            StringBuilder sb=new StringBuilder();
-            sb.append(tiledata);
             String title=tileMap.getTitle();
             title=title.replace("_"+tileMap.getRecordDate(),"");
-            sb.append(File.separator).append(title);
-            sb.append(File.separator).append(tileMap.getRecordDate());
-            sb.append(File.separator).append(tile.getZ());
-            sb.append(File.separator).append(tile.getX());
-            sb.append(File.separator).append(tile.getY());
-            sb.append(".").append(tileMap.getFileExtension());
-            String path=sb.toString();
 
-            if("tif".equalsIgnoreCase(tileMap.getExtension())){
-                return CommonUtil.fileToByteArray(path);
-            }else{
-                return CommonUtil.imageToByteArray(path);
-            }
+            return restTileDao.getLocalTmsTile(
+                    title,
+                    tileMap.getRecordDate(),
+                    tileMap.getFileExtension(),
+                    tile.getX(),
+                    tile.getY(),
+                    tile.getZ());
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -168,24 +167,50 @@ public class TileService {
         try{
             int alterY=new Double(Math.pow(2,tile.getZ())-1-tile.getY()).intValue();
             tile.setY(alterY);
-            StringBuilder sb=new StringBuilder();
-            sb.append(tiledata);
-            sb.append(File.separator).append(tileMap.getTitle());
-            sb.append(File.separator).append(tile.getZ());
-            sb.append(File.separator).append(tile.getX());
-            sb.append(File.separator).append(tile.getY());
-            sb.append(".").append(tileMap.getFileExtension());
-            String path=sb.toString();
 
-            Set<String> extensionSet= Sets.newHashSet("tif","geojson","terrain");
-            if(extensionSet.contains(tileMap.getExtension().toLowerCase())){
-                return CommonUtil.fileToByteArray(path);
-            }else {
-                return CommonUtil.imageToByteArray(path);
-            }
+            return restTileDao.getLocalTmsTile(
+                    tileMap.getTitle(),
+                    null,
+                    tileMap.getFileExtension(),
+                    tile.getX(),
+                    tile.getY(),
+                    tile.getZ());
         }catch (Exception ex){
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private byte[] getExtXyzTile(TileMap tileMap, Tile tile){
+        JSONObject prop=JSON.parseObject(tileMap.getProp());
+        String template=prop.getString("template");
+        try{
+            /*byte[] bytes= restTileDao.getLocalTmsTile(
+                    tileMap.getTitle(),
+                    null,
+                    tileMap.getFileExtension(),
+                    tile.getX(),
+                    tile.getY(),
+                    tile.getZ());
+            if(bytes==null){
+                return restTileDao.getExtXyzTile(template,tile.getX(),tile.getY(),tile.getZ());
+            }*/
+            return restTileDao.cacheTmsTile(
+                    tileMap.getTitle(),
+                    tileMap.getFileExtension(),
+                    template,
+                    tile.getX(),
+                    tile.getY(),
+                    tile.getZ());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    private byte[] getExtTmsTile(TileMap tileMap, Tile tile){
+        JSONObject prop=JSON.parseObject(tileMap.getProp());
+        String template=prop.getString("template");
+        return restTileDao.getExtTmsTile(template,tile.getX(),tile.getY(),tile.getZ());
     }
 }

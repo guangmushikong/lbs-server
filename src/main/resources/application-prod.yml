@@ -2,7 +2,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://datalaker-svr01:55432/cateye
+    url: jdbc:postgresql://172.25.28.116:5432/cateye
     username: cateye
     password: '#Cateye@2019$'
     hikari:
@@ -25,12 +25,12 @@ spring:
     t_tileset: t_tileset
     t_kml_data: t_kml_data
   img:
-    path: F:/data/img
+    path: /home/dev/data/img
   kml:
-    path: F:/data/kml
+    path: /home/dev/data/kml
 dem:
-  gujiao: e:/data/gujiao.tif
-  jingzhuang: e:/data/jzhdem_7m.tif
+  gujiao: /home/dev/data/gujiao.tif
+  jingzhuang: /home/dev/data/jzhdem_7m.tif
 service:
-  mapserver: localhost:8080
-  tiledata: E:/data/tile
+  mapserver: 211.154.194.45:8080
+  tiledata: /home/dev/data/tile

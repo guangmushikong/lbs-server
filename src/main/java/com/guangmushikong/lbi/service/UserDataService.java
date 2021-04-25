@@ -2,14 +2,20 @@
 package com.guangmushikong.lbi.service;
 
 import com.guangmushikong.lbi.dao.UserDataDao;
+import com.guangmushikong.lbi.model.KmlDO;
 import com.guangmushikong.lbi.model.UserDataDO;
+import com.guangmushikong.lbi.util.IOUtils;
+import com.guangmushikong.lbi.util.KmlUtil;
 import com.vividsolutions.jts.geom.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.kml.KMLConfiguration;
+import org.geotools.xml.PullParser;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeType;
@@ -19,13 +25,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 /*************************************
@@ -42,6 +54,8 @@ public class UserDataService {
 
     @Value("${spring.img.path}")
     String imgPath;
+    @Value("${spring.kml.path}")
+    String kmlPath;
     @Value("${service.tiledata}")
     String tiledata;
 
@@ -85,6 +99,72 @@ public class UserDataService {
         String filePath=imgPath+File.separator+projectId+File.separator+fileName;
         File file=new File(filePath);
         return FileCopyUtils.copyToByteArray(file);
+    }
+
+    public int kml2PgTable(String username,InputStream is)throws Exception{
+        PullParser parser = new PullParser(new KMLConfiguration(), is, SimpleFeature.class);
+        List<SimpleFeature> features = new ArrayList<>();
+        SimpleFeature simpleFeature = (SimpleFeature) parser.parse();
+        while (simpleFeature != null) {
+            if("placemark".equalsIgnoreCase(simpleFeature.getFeatureType().getTypeName())){
+                features.add(simpleFeature);
+            }
+            simpleFeature = (SimpleFeature) parser.parse();
+        }
+        for(SimpleFeature feature:features){
+            KmlDO kmlDO=new KmlDO();
+            kmlDO.setId(feature.getID());
+            kmlDO.setUserName(username);
+            Object name=feature.getAttribute("name");
+            if(name!=null) {
+                kmlDO.setName(name.toString());
+            }
+            Geometry geom=(Geometry)feature.getDefaultGeometry();
+            kmlDO.setType(geom.getGeometryType());
+            kmlDO.setGeometry(geom);
+            //log.info("id:{},name:{},geom:{}",kmlDO.getId(),kmlDO.getName(),geom.getGeometryType());
+            userDataDao.addKml(kmlDO);
+        }
+        return features.size();
+    }
+
+    public void getKmlFile(
+            String userName,
+            String type,
+            ServletOutputStream outputStream)throws IOException{
+        String path=String.format("%s/%s_%s.kml",kmlPath,userName,type);
+        List<KmlDO> list=userDataDao.listKml(userName,type);
+        List<String> attrKeys=new ArrayList();
+        attrKeys.add("name");
+        List<Map<String,Object>> geomList = new ArrayList<>();
+        for(KmlDO kmlDO:list){
+            Map<String,Object> item = new HashMap<>();
+            if(StringUtils.isNotEmpty(kmlDO.getName())){
+                item.put("name",kmlDO.getName());
+            }else {
+                item.put("name","");
+            }
+            item.put("geoKey",kmlDO.getGeometry());
+            geomList.add(item);
+        }
+        try{
+            KmlUtil.write2Wml(path,type,"geoKey",attrKeys,geomList);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        IOUtils.downFile(outputStream,path);
+    }
+
+    public Long getKmlFileSize(
+            String userName,
+            String type){
+        String path=String.format("%s/%s_%s.kml",kmlPath,userName,type);
+        File f=new File(path);
+        if(!f.exists()){
+            log.error("文件不存在{}",path);
+            return -1L;
+        }
+        return f.length();
     }
 
     public void shp2PgTable(String layerName)throws Exception{

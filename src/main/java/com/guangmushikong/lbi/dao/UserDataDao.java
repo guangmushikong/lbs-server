@@ -2,8 +2,11 @@
 package com.guangmushikong.lbi.dao;
 
 
+import com.guangmushikong.lbi.model.KmlDO;
 import com.guangmushikong.lbi.model.UserDataDO;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.WKTReader;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +28,8 @@ import java.util.List;
 public class UserDataDao extends CommonDao{
     @Value("${spring.table.t_custom_data}")
     String t_custom_data;
+    @Value("${spring.table.t_kml_data}")
+    String t_kml_data;
 
     public List<UserDataDO> listUserData(long projectId){
         String sql=String.format("select uuid,name,type,project_id,user_name,prop,st_astext(geom) as wkt from %s where project_id=%d",t_custom_data,projectId);
@@ -102,6 +107,32 @@ public class UserDataDao extends CommonDao{
                 });
     }
 
+    public List<KmlDO> listKml(String userName,String type){
+        String sql=String.format("select id,name,user_name,type,st_astext(geom) as wkt from %s where user_name=? and type=?",t_kml_data);
+        return jdbcTemplate.query(
+                sql,
+                new Object[]{userName,type},
+                new int[]{Types.VARCHAR,Types.VARCHAR},
+                (rs,rowNum)->toKmlDO(rs));
+    }
+
+    public void addKml(KmlDO kmlDO){
+        String sql=String.format("insert into %s(user_name,name,type,geom) values(?,?,?,ST_GeomFromText(?,4326))",t_kml_data);
+        jdbcTemplate.update(sql,
+                new Object[]{
+                        kmlDO.getUserName(),
+                        kmlDO.getName(),
+                        kmlDO.getType(),
+                        kmlDO.getGeometry().toText()
+                },
+                new int[]{
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.VARCHAR,
+                        Types.VARCHAR
+                });
+    }
+
     public void saveRow(String sql,Object[] objects,int[] types){
         jdbcTemplate.update(sql,objects,types);
     }
@@ -117,6 +148,23 @@ public class UserDataDao extends CommonDao{
         u.setProp(rs.getString("prop"));
         u.setWkt(rs.getString("wkt"));
 
+        return u;
+    }
+
+    private KmlDO toKmlDO(ResultSet rs)throws SQLException {
+        KmlDO u=new KmlDO();
+        u.setId(rs.getString("id"));
+        u.setName(rs.getString("name"));
+        u.setUserName(rs.getString("user_name"));
+        u.setType(rs.getString("type"));
+        String wkt=rs.getString("wkt");
+        try{
+            WKTReader wktReader=new WKTReader();
+            Geometry geometry=wktReader.read(wkt);
+            u.setGeometry(geometry);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return u;
     }
 }

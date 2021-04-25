@@ -4,4 +4,4 @@ spring:
   application:
     name: lbs-server
   profiles:
-    active: dev
+    active: local

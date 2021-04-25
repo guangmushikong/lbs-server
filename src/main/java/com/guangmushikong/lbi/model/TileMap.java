@@ -22,8 +22,8 @@ public class TileMap {
     /**
      * 摘要
      */
-    @JSONField(serialize=false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value="Abstract")
+    @JSONField(name="Abstract")
     String _abstract;
 
     /**
@@ -111,11 +111,4 @@ public class TileMap {
     @JSONField(serialize=false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String fileExtension;
-
-    public void setAbstract(String val){
-        this._abstract=val;
-    }
-    public String getAbstract(){
-        return this._abstract;
-    }
 }

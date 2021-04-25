@@ -2,9 +2,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://datalaker-svr01:55432/cateye
-    username: cateye
-    password: '#Cateye@2019$'
+    url: jdbc:postgresql://211.154.194.44:5432/cateye
+    username: postgres
+    password: 'Cateye@2018'
     hikari:
       auto-commit: true
       connection-test-query: SELECT 1

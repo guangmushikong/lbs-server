@@ -1,4 +1,4 @@
-package com.guangmushikong.lbi.model;
+package com.guangmushikong.lbi.model.geojson;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.annotation.JSONField;

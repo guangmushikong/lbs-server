@@ -1,7 +1,8 @@
 package com.guangmushikong.lbi.controller;
 
-import com.guangmushikong.lbi.model.ServiceType;
+import com.guangmushikong.lbi.model.enums.ServiceType;
 import com.guangmushikong.lbi.model.Tile;
+import com.guangmushikong.lbi.model.enums.TileType;
 import com.guangmushikong.lbi.service.TileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,16 +44,9 @@ public class TMSController {
             Tile tile=new Tile(x,y,z);
             byte[] bytes=tileService.getTile(ServiceType.TMS,tileset,tile);
             ResponseEntity.BodyBuilder bodyBuilder=ResponseEntity.ok();
-            if("json".equalsIgnoreCase(extension)){
-                bodyBuilder.contentType(MediaType.APPLICATION_JSON);
-            }else if("png".equalsIgnoreCase(extension)){
-                bodyBuilder.contentType(MediaType.IMAGE_PNG);
-            }else if("jpeg".equalsIgnoreCase(extension)){
-                bodyBuilder.contentType(MediaType.IMAGE_JPEG);
-            }else if("tif".equalsIgnoreCase(extension)){
-                bodyBuilder.contentType(MediaType.valueOf("image/tif"));
-            }else if("terrain".equalsIgnoreCase(extension)){
-                bodyBuilder.contentType(MediaType.valueOf("application/vnd.quantized-mesh"));
+            TileType tileType= TileType.getByCode(extension.toLowerCase());
+            if(tileType!=null){
+                bodyBuilder.contentType(tileType.getContent());
             }
             return bodyBuilder.body(bytes);
         }catch (Exception e){

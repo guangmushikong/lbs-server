@@ -13,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -101,6 +103,28 @@ public class DataController {
         }
     }
 
+    @PostMapping(value="/kmlUpload")
+    public ResultBody kmlUpload(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request){
+        try{
+            String token=request.getHeader(JwtTokenFilter.HEADER_STRING);
+            String username = JwtTokenUtil.getUsernameFromToken(token);
+            if (file != null) {
+                //获取上传原图片名称
+                String fileName = file.getOriginalFilename();
+                log.info("【kmlUpload】fileName:{}",fileName);
+                int total=userDataService.kml2PgTable(username,file.getInputStream());
+                return new ResultBody<>(0,"OK",total);
+            }else {
+                return new ResultBody<>(-1,"没有上传文件");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResultBody<>(-1,e.getMessage());
+        }
+    }
+
     @GetMapping("/syncShp")
     public ResultBody syncShp(@RequestParam("layerName") String layerName) {
         try{
@@ -109,6 +133,31 @@ public class DataController {
         }catch (Exception e){
             e.printStackTrace();
             return new ResultBody<>(-1,e.getMessage());
+        }
+    }
+
+    @GetMapping("/downKml")
+    public void downKml(
+            @RequestParam("type") String type,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        if (response == null || type == null || type.equals("")) {
+            return;
+        }
+        response.setContentType("application/x-msdownload");
+        String token=request.getHeader(JwtTokenFilter.HEADER_STRING);
+        String username = JwtTokenUtil.getUsernameFromToken(token);
+        String fileName=String.format("%s_%s.kml",username,type);
+        response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+        Long filesize=userDataService.getKmlFileSize(username,type);
+        log.info("文件大小{}",filesize);
+        response.addHeader("Content-Length",filesize.toString());
+        ServletOutputStream sos = null;
+        try {
+            sos = response.getOutputStream();
+            userDataService.getKmlFile(username,type,sos);
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
     }
 }

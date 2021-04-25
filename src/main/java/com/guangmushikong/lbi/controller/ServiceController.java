@@ -2,7 +2,7 @@
 package com.guangmushikong.lbi.controller;
 
 
-import com.guangmushikong.lbi.model.ServiceType;
+import com.guangmushikong.lbi.model.enums.ServiceType;
 import com.guangmushikong.lbi.model.xml.Root_Services;
 import com.guangmushikong.lbi.model.xml.Root_TileMap;
 import com.guangmushikong.lbi.model.xml.Root_TileMapService;

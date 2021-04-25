@@ -1,4 +1,4 @@
-package com.guangmushikong.lbi.model;
+package com.guangmushikong.lbi.model.enums;
 
 public enum  ServiceType {
     XYZ(1),TMS(2);

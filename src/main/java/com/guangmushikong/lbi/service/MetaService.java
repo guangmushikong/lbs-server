@@ -72,8 +72,8 @@ public class MetaService {
             //parent href
             TileMapService nService=metaDao.getTileMapServiceById(u.getServiceId());
             item.setServices(nService.getHref());
-            if(StringUtils.isNotEmpty(u.getAbstract())){
-                item.setAbstract(u.getAbstract());
+            if(StringUtils.isNotEmpty(u.get_abstract())){
+                item.setAbstract(u.get_abstract());
             }
             item.setTitle(u.getTitle());
             item.setSRS(u.getSrs());

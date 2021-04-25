@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.guangmushikong.lbi.model.*;
 
+import com.guangmushikong.lbi.model.geojson.FeatureVO;
+import com.guangmushikong.lbi.model.geojson.GeometryVO;
 import com.guangmushikong.lbi.util.TileSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -20,7 +22,7 @@ import java.util.List;
 public class TileDao extends CommonDao{
     final GeometryFactory GEO_FACTORY=new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),4326);
 
-    public List<FeatureVO> getFeatureListByTile(String tableName,String[] fields,JSONObject prop,Tile tile){
+    public List<FeatureVO> getFeatureListByTile(String tableName, String[] fields, JSONObject prop, Tile tile){
         Envelope enve= TileSystem.TileXYToBounds(tile);
         Geometry grid= GEO_FACTORY.toGeometry(enve);
         String field;

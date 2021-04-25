@@ -1,4 +1,4 @@
-package com.guangmushikong.lbi.model;
+package com.guangmushikong.lbi.model.enums;
 
 /**
  * 地图瓦片类别
@@ -10,15 +10,16 @@ public enum MapKind {
     LocalCache(4,"本地缓存图片"),
     LocalTimeCache(5,"本地时序缓存图片"),
     PGLayer(6,"PG图层"),
-    XYZLayer(7,"XYZ图层");
+    XYZLayer(7,"XYZ图层"),
+    ExtXyzLayer(8,"外部XYZ图层"),
+    ExtTmsLayer(9,"外部TMS图层");
 
     int code;
-    String msg;
+    String name;
 
-    //构造器默认也只能是private, 从而保证构造函数只能在内部使用
-    MapKind(int code,String msg) {
+    MapKind(int code,String name) {
         this.code = code;
-        this.msg=msg;
+        this.name=name;
     }
     public int getCode() {
         return code;
@@ -28,12 +29,12 @@ public enum MapKind {
         this.code = code;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getName() {
+        return name;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setName(String msg) {
+        this.name = msg;
     }
 
     public static MapKind getByValue(int value) {

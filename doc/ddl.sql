@@ -250,3 +250,14 @@ create table t_custom_data
     create_time timestamp with time zone NOT NULL DEFAULT now(),
     modify_time timestamp with time zone NOT NULL DEFAULT now()
 );
+
+--10、kml数据集表
+create table t_kml_data
+(
+    id bigserial NOT NULL PRIMARY KEY,
+    name text,
+	user_name text,
+	type text,
+    geom geometry,
+    create_time timestamp with time zone NOT NULL DEFAULT now()
+);
